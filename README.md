@@ -1,5 +1,7 @@
 # DalleDisplayer
 
+test
+
 DalleDisplayer is a program originally designed for a single board computer (a raspberry pi 3 specifically) that displays Dalle Images to a connected screen. It is planned to support voice commands, touch screens and remote commands. These will all be incremental features!
 
 This is a side project I am working on as I upgraded my retropie gaming system to the new raspbery pi 5 and want to do a cool project with my old raspberry pi 3. In particular I am interested in doing something AI related as the latest developments in AI tools (like ChatGPT 4) seem to have lots of pratical utility in peoples lives. Setting aside the controversies arising from AI tools I want to get more involved in developing with them both for my job and for fun. 
