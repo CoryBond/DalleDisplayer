@@ -1,17 +1,17 @@
-# DalleDisplayer
+# 🍱 DalleDisplayer
 
 DalleDisplayer is a program originally designed for a single board computer (a raspberry pi 3 specifically) that displays Dalle Images to a connected screen. It is planned to support voice commands, touch screens and remote commands. These will all be incremental features!
 
 This is a side project I am working on as I upgraded my retropie gaming system to the new raspbery pi 5 and want to do a cool project with my old raspberry pi 3. In particular I am interested in doing something AI related as the latest developments in AI tools (like ChatGPT 4) seem to have lots of pratical utility in peoples lives. Setting aside the controversies arising from AI tools I want to get more involved in developing with them both for my job and for fun. 
 
-## Roadmap
+## 🗺️ Roadmap
 
 1. Run a python GUI on a monitor [SUCCESS]
 2. Create a git repo for the project [SUCCESS]
-3. Boot the DalleDisplayer GUI on device start.
-4. Connect 7 inch touchscreen display to the pi.
-  1. Boot GUI to connected touchscreen.
-  2. Wire the touchscreen to the board.
+3. Boot the DalleDisplayer GUI on device start [SUCCESS]
+4. Connect 7 inch touchscreen display to the pi [SUCCESS]
+  1. Boot GUI to connected touchscreen [SUCCESS]
+  2. Wire the touchscreen to the board [SUCCESS]
 5. Install the Dalle Python client.
   1. Pay for a client subscription.
 6. Display Dalle Images to screen via hardcoded prompts.
@@ -20,7 +20,7 @@ This is a side project I am working on as I upgraded my retropie gaming system t
 
 7 forward might be more complicated then initially though as the Raspbery Pi 3 apparently does not support input audio and I see meantion of sound boards required to make input audio to work... but I also articles like this : https://raspberrytips.com/add-microphone-raspberry-pi/ which apparently say a usb microphone just works... and with no need for drivers either. When it gets to around 7 it will all be fairly experimental. I will be getting a 7 inch touchscreen display and microphone at the same time so I might do a mini POC for 7 before other steps just to see potential issues.
 
-## How to display GUI through SSH / Remote VSCode
+## 📶 How to display GUI through SSH / Remote VSCode
 
 If on a windows machine and you want to display this GUI back through SSH to the client then do the following:
 1. Install and run https://sourceforge.net/projects/xming/
@@ -29,7 +29,7 @@ If on a windows machine and you want to display this GUI back through SSH to the
 
 And this should make it work!
 
-## How to display GUI on connected monitor
+## 🖥️ How to display GUI on connected monitor
 
 Dalle Displayer can run in either Desktop Environments or in Window Manger environments though the later will require some extra work to setup.
 
@@ -47,6 +47,12 @@ If the DalleDisplayer closes while openbox-session is still up you can do a few 
 
 1. Restart xinit + openbox
 2. Run the script directly while openbox session is open with `DISPLAY=:0.0 python3 ~path_to_DalleDisplayer_root~/__init__.py`
+
+#### Boot
+
+Several linux tools allow xinit + openbox + DalleDisplayer to start at boot. One of the most popular is the rc.local script.
+
+After opening the script with `sudo nano /etc/rc.local` all you need to do is add a line before the "exit 0" at the end of the script that run xinit + openbox with admin permissions. Such as `sudo xinit openbox-session`. If you also setup DalleDisplayer in the openbox autostart file then it will load at boot as well.
 
 #### OpenBox command line
 
