@@ -8,10 +8,10 @@ This is a side project I am working on as I upgraded my retropie gaming system t
 
 1. Run a python GUI on a monitor [SUCCESS]
 2. Create a git repo for the project [SUCCESS]
-3. Boot the DalleDisplayer GUI on device start.
-4. Connect 7 inch touchscreen display to the pi.
-  1. Boot GUI to connected touchscreen.
-  2. Wire the touchscreen to the board.
+3. Boot the DalleDisplayer GUI on device start [SUCCESS]
+4. Connect 7 inch touchscreen display to the pi [SUCCESS]
+  1. Boot GUI to connected touchscreen [SUCCESS]
+  2. Wire the touchscreen to the board [SUCCESS]
 5. Install the Dalle Python client.
   1. Pay for a client subscription.
 6. Display Dalle Images to screen via hardcoded prompts.
@@ -47,6 +47,12 @@ If the DalleDisplayer closes while openbox-session is still up you can do a few 
 
 1. Restart xinit + openbox
 2. Run the script directly while openbox session is open with `DISPLAY=:0.0 python3 ~path_to_DalleDisplayer_root~/__init__.py`
+
+#### Boot
+
+Several linux tools allow xinit + openbox + DalleDisplayer to start at boot. One of the most popular is the rc.local script.
+
+After opening the script with `sudo nano /etc/rc.local` all you need to do is add a line before the "exit 0" at the end of the script that run xinit + openbox with admin permissions. Such as `sudo xinit openbox-session`. If you also setup DalleDisplayer in the openbox autostart file then it will load at boot as well.
 
 #### OpenBox command line
 
