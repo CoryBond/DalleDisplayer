@@ -1,0 +1,5 @@
+dependency_injector
+git+https://github.com/Stability-AI/stability-sdk.git
+git+https://github.com/openai/openai-python.git
+pillow
+requests
