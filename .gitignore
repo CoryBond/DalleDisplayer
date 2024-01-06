@@ -6,3 +6,4 @@ bin
 myenv
 dalle.key
 __pycache__
+*.log

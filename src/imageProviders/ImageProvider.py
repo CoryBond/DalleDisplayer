@@ -10,7 +10,6 @@ class ImageProvider(object):
     get_image_from_string(text)
         Retrieves image from API. Returns PIL Image object. Returns 'None' object on failure
     """
-
     def __init__(self, key=None, keyname=None):
         self.key = key
         self.keyname = keyname

@@ -1,40 +1,56 @@
 
-import tkinter as tk
+from tkinter import *
 import logging
-from datetime import datetime
+from PIL import Image, ImageTk
+
+from imageProviders.ImageProvider import ImageProvider
+from utils.utils import get_project_root
+from utils.loggingUtils import generate_logger
 
 class RootWindow(object):
 
 
-    def __init__(self):
+    def __init__(self, imageProvider: ImageProvider):
 
-        # create logger with 'spam_application'
-        logger = logging.getLogger('spam_application')
-        logger.setLevel(logging.DEBUG)
-        # create file handler which logs even debug messages
-        fh = logging.FileHandler('spam.log')
-        fh.setLevel(logging.DEBUG)
-        logger.addHandler(fh)
-        self.logger = logger
+        self.logger = generate_logger(self.__class__.__name__)
 
-        root = tk.Tk()
+        self.imageProvider = imageProvider
+
+        root = Tk()
         root.attributes('-fullscreen', True)
         root.title("DalleDisplayer")
         self.root = root
 
+        label = Label(self.root)
+        self.label = label
+
         return
 
 
-    def start(self):
+    def update_image(self, image): 
 
-        def on_button_click():
-            print("Button clicked!")
+        display = ImageTk.PhotoImage(image)
+
+        self.label.configure(image=display)
+        self.label.image=display
+        self.label.pack(side="bottom", fill="both", expand="yes")
+
+    def on_button_click(self):
+            image = self.imageProvider.get_image_from_string("A cool turtle with shades")
+            image.save(get_project_root()/'..'/'test.png', "PNG");
+            self.update_image(image)
+
+    def start(self):
 
         # Create the main window
 
         # Create a button and pack it into the window
-        button = tk.Button(self.root, text="Click me!", command=on_button_click)
+        button = Button(self.root, text="Click me!", command=self.on_button_click)
         button.pack(pady=10)
+
+        image  = Image.open(get_project_root()/'..'/'test.png')
+
+        self.update_image(image)
 
         # Run the Tkinter event loop
         self.root.mainloop()

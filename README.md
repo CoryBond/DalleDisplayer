@@ -39,9 +39,12 @@ For example:
 | System | Package | Install Command                      | Required By        |
 | ------ | ------- | ------------------------------------ | ------------------ |
 | Linx   | tKinter | sudo apt-get install python3-tk      | tKinter            |
+| Linx   | tKinterImage | sudo apt-get install python3-pil python3-pil.imagetk      | tKinter            |
 | Linx   | PyAudio | sudo apt-get install python3-pyaudio | pyaudio            |
 | Linx   | Flac    | sudo apt-get install flac            | speech_recognition |
 | Linx   | ESpeak  | sudo apt-get install espeak          | speech_recognition |
+
+
 
 ### PiWheels
 
