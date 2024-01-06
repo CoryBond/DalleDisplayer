@@ -3,3 +3,6 @@ lib
 include
 bin
 *.log
+myenv
+dalle.key
+__pycache__
