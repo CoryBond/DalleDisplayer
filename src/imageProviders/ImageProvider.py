@@ -1,3 +1,5 @@
+from PIL import Image
+
 class ImageProvider(object):
     """
     A superclass used to wrap APIs for web operations.
@@ -15,6 +17,11 @@ class ImageProvider(object):
         self.keyname = keyname
         self.host = None
         return
+    
 
-    def get_image_from_string(self, text):
+    def name(self) -> str:
+        return
+
+
+    def get_image_from_string(self, text) -> Image:
         return

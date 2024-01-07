@@ -20,10 +20,14 @@ class DalleProvider(ImageProvider):
         self.openAiClient = openai.OpenAI(api_key=key)
 
         return
+    
+
+    def name(self):
+        return "DalleProvider"
 
 
-    def get_image_from_string(self, text, height=0, width=0) -> Image:
-        self.logger.info("Generating image for text : " + text)
+    def get_image_from_string(self, prompt, height=0, width=0) -> Image:
+        self.logger.info("Generating image for prompt : " + prompt)
         try:
             # Select appropriate size from options in
             # res = list(DalleConst.SIZES.value.keys())[0]
@@ -36,7 +40,7 @@ class DalleProvider(ImageProvider):
 
             response = self.openAiClient.images.generate(
                 model="dall-e-3",
-                prompt="A cool turtle dude",
+                prompt=prompt,
                 size="1024x1024",
                 quality="standard",
                 n=1,
@@ -50,6 +54,4 @@ class DalleProvider(ImageProvider):
             self.logger.error(e)
             return None
         
-        # img.save("test.png", "PNG");
-
         return img

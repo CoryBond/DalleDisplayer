@@ -20,10 +20,8 @@ This is a side project I am working on as I upgraded my retropie gaming system t
 
 ## Running The Program
 
-This project was built in Python3.11 on a Raspberry Pi 3 with a arm7 (32 bit) chipset. Python3.11 is not the default python version of earlier RaspberryPi OS (its 3.7.x) and its not recommended you change the default python version of those systems in case of breaking other scripts on the plateform. Instead its recommended you install 3.8+ seperatly. Its possible to do this by installing the source code and compilling from scratch. See: https://itheo.tech/install-python-38-on-a-raspberry-pi
-Its recommended to make the virtual python env using Python3.11 rather then Python3.7 with `Python3.11 -m env myenv`.
-
-If using a virtual env and `Python3.11 dalle.py` doesn't work or is giving you weird dependency errors you can try to the scripts with the python interpreter directly in myenv. Something like `*PATH_TO_DALLE_DISPLAYER*/myenv/bin/python dalle.py`. I have seen this on my machine but don't really know how to fix it so that running Python3.11 from the virtual environment will use the right interpreter.
+This project was built in Python3.9 on a Raspberry Pi 3 with a arm7 (32 bit) chipset. Python 3.9 is the default version used by the Raspberry Pi OS Bookworm.
+Its recommended to make a virtual python env with `Python3.9 -m env myenv`. Activate this virtual environment, install all necessary packages and run the entry file in `src/main.py`
 
 ## 🏴󠁶󠁥󠁷󠁿 Dependencies
 
@@ -43,7 +41,6 @@ For example:
 | Linx   | PyAudio | sudo apt-get install python3-pyaudio | pyaudio            |
 | Linx   | Flac    | sudo apt-get install flac            | speech_recognition |
 | Linx   | ESpeak  | sudo apt-get install espeak          | speech_recognition |
-
 
 
 ### PiWheels
@@ -71,7 +68,7 @@ Before you can display this program onto a connected monitor you must first setu
 1. Install xinit openbox
    (NOTE: [xinit](https://en.wikipedia.org/wiki/Xinit) is display server while [openbox]() is a graphical window manager. Together these will allow rendering the python GUI to a connected monitor. )
 2. Create a directory/file called at `~/.config/openbox/autostart`
-   1. Add an entry in that file as `python3 ~path_to_DalleDisplayer_root~/src/main.py` (autostart runs everytime the openbox-session [not the openbox command line] runs)
+   1. Add an entry in that file as ` ~path_to_DalleDisplayer_root~/myenv/bin/python ~path_to_DalleDisplayer_root~/src/main.py` (autostart runs everytime the openbox-session [not the openbox command line] runs)
 
 After following these steps you can now run `xinit openbox-session` and it will should start up the DalleDisplayer and render the GUI to the connected monitor.
 If the DalleDisplayer closes while openbox-session is still up you can do a few things to restart it:
@@ -85,14 +82,22 @@ Several linux tools allow xinit + openbox + DalleDisplayer to start at boot thou
 
 After opening `crontab -e` all you need to do is add a line like `@reboot xinit openbox-session`. If you also setup DalleDisplayer in the openbox autostart file then it will load at boot as well.
 
-#### OpenBox command line
+#### Script
 
-I have tried making a start script to run openbox and launch the DalleDisplayer program directly without the need of configuring a external autostrat script but have been unsuccessful. Openbox seems to not run the program at all
-and hangs. To run this script you can execute the command `startx ./openBoxStarter.bash` though it might not work.
+This project also includes a script that does the following:
 
-This script was made via a suggestion in https://raspberrypi.stackexchange.com/questions/98944/launch-a-gui-tkinter-program-on-boot.
+1. Kill openbox instances that would be running the displayer (this will also kill entire openbox sessions!)
+2. Restart openbox specificlaly opening only this python application.
+
+Simply run the script with `startx ./tools/openBoxStarter.bash`.
 
 #### Calibrating Touchscreen
 
 For touchscreens its possible for the input to off.... sometimes very off. In a headless environment there is a tool
 that uses xinit to recalibrate the input. Simply install [xinput_calibrator](xinput_calibrator) and run it with `startx`
+
+## Tests
+
+There is included a test package of pytests for various functions and classes used throughout the project. 
+
+There exists a test UI which uses mock APIs rather then real ones for dev purposes. Simply run the application in this mode run the openbox script with the t flag (ex: `startx ./tools/openBoxStarter.bash -t`)
