@@ -4,14 +4,15 @@ from pathlib import Path
 
 import sys
 sys.path.append(Path(__file__).parent.parent.as_posix()+"/src") # Add src directory to python path so we can access src modules
-
 print(sys.path)
 
 from depdencyInjection.Container import Container
 from utils.dependencyInjectionUtils import override
 
+from utils.loggingUtils import configureBasicLogger
 
-logging.basicConfig()
+
+configureBasicLogger(filename="test_aiImageDisplayer.log", level=logging.DEBUG)
 
 
 def main() -> None:

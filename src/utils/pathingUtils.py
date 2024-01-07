@@ -7,3 +7,7 @@ def get_project_root() -> Path:
 
 def get_image_repos() -> Path:
     return get_project_root()/'..'/'resources'/'imageRepos'
+
+
+def get_log_directory() -> Path:
+    return get_project_root()/'..'/'resources'/'logs'

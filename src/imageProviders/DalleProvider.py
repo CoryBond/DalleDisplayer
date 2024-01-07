@@ -5,17 +5,12 @@ import requests
 from imageProviders.ImageProvider import ImageProvider
 from PIL import Image
 
-from utils.loggingUtils import generate_logger
-
-
 class DalleProvider(ImageProvider):
 
 
     # inherits from Provider
     def __init__(self, key=None):
         super().__init__(key=key, keyname=key)
-
-        self.logger = generate_logger(self.__class__.__name__)
 
         self.openAiClient = openai.OpenAI(api_key=key)
 
@@ -27,7 +22,7 @@ class DalleProvider(ImageProvider):
 
 
     def get_image_from_string(self, prompt, height=0, width=0) -> Image:
-        self.logger.info("Generating image for prompt : " + prompt)
+        logging.info("Generating image for prompt : " + prompt)
         try:
             # Select appropriate size from options in
             # res = list(DalleConst.SIZES.value.keys())[0]
@@ -47,11 +42,11 @@ class DalleProvider(ImageProvider):
             )
 
             url = response.data[0].url
-            self.logger.info("Generated image at : " + url)
+            logging.info("Generated image at : " + url)
             img = Image.open(BytesIO(requests.get(url).content))
 
         except BaseException as e:
-            self.logger.error(e)
+            logging.error(e)
             return None
         
         return img
