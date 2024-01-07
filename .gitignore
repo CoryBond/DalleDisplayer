@@ -3,7 +3,7 @@ lib
 include
 bin
 *.log
+resources/imageRepos
 myenv
 dalle.key
 __pycache__
-*.log
