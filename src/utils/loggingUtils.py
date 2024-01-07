@@ -2,14 +2,11 @@
 
 import logging
 
+from utils.pathingUtils import get_log_directory
 
-def generate_logger(logFileName: str) -> logging.Logger:
-    logger = logging.getLogger('spam_application')
-    logger.setLevel(logging.DEBUG)
-    # create file handler which logs even debug messages
-    fh = logging.FileHandler(logFileName + ".log")
-    fh.setLevel(logging.DEBUG)
-    logger.addHandler(fh)
-    
-    return logger
 
+FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+
+def configureBasicLogger(filename='aiImageDisplayer.log', level=logging.INFO):
+    logging.basicConfig(filename=get_log_directory()/filename, encoding='utf-8', format=FORMAT, level=level)    

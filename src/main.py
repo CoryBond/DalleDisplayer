@@ -2,9 +2,10 @@
 import logging
 
 from depdencyInjection.Container import Container
+from utils.loggingUtils import configureBasicLogger
 
 
-logging.basicConfig()
+configureBasicLogger()
 
 
 def main() -> None:
