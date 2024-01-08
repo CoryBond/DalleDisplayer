@@ -36,6 +36,12 @@ For example:
 
 | System | Package | Install Command                      | Required By        |
 | ------ | ------- | ------------------------------------ | ------------------ |
+ sudo apt-get install qtvirtualkeyboard-plugin
+ qml-module-qtquick-controls
+ qml-module-qtquick-layouts
+ qml-module-qt-labs-folderlistmodel
+
+| Linux  | PYQT5   | sudo apt install python3-pyqt5       | pyqt5              |
 | Linx   | tKinter | sudo apt-get install python3-tk      | tKinter            |
 | Linx   | tKinterImage | sudo apt-get install python3-pil python3-pil.imagetk      | tKinter            |
 | Linx   | PyAudio | sudo apt-get install python3-pyaudio | pyaudio            |
@@ -101,3 +107,16 @@ that uses xinit to recalibrate the input. Simply install [xinput_calibrator](xin
 There is included a test package of pytests for various functions and classes used throughout the project. 
 
 There exists a test UI which uses mock APIs rather then real ones for dev purposes. Simply run the application in this mode run the openbox script with the t flag (ex: `startx ./tools/openBoxStarter.bash -t`)
+
+
+
+
+
+
+
+
+
+
+## SCRAP
+
+tkinker doesn't support touch gestures though there is a draft for it : https://core.tcl-lang.org/tips/doc/trunk/tip/570.md
