@@ -1,13 +1,11 @@
 
 import logging
 from tkinter import *
-import os
 
 from imageProviders.ImageProvider import ImageProvider
+from repoManager.RepoManager import RepoManager
+from speechRecognition.SpeechRegonizer import SpeechRecognizer
 from ui.ImageViewer import ImageViewer
-from utils.dateUtils import get_current_sortable_datetime_strs
-# from ui.ImageViewer import ImageViewer
-from utils.pathingUtils import get_image_repos
 
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QHBoxLayout, QVBoxLayout, QLineEdit, QWidget
 from PyQt5.QtWidgets import QWidget
@@ -15,20 +13,14 @@ from PyQt5.QtWidgets import QWidget
 class MainWindow(QMainWindow):
 
 
-    def __init__(self, imageProvider: ImageProvider, parent=None):
+    def __init__(self, imageProvider: ImageProvider, repoManager: RepoManager, speechRecognizer: SpeechRecognizer, parent=None):
         super(MainWindow, self).__init__(parent)       
 
         self.imageProvider = imageProvider
-
-        self.imageRepo = self.get_engine_repo()
-        if not os.path.exists(self.imageRepo):
-            os.mkdir(self.imageRepo)
+        self.speechRecognizer = speechRecognizer
+        self.repoManager = repoManager
 
         self.init_ui()
-
-
-    def get_engine_repo(self):
-         return get_image_repos()/self.imageProvider.engine_name()
 
 
     def init_ui(self):
@@ -43,17 +35,16 @@ class MainWindow(QMainWindow):
         imageGenerationLayout = QVBoxLayout(centralWidget)
 
         self.inputbox = QLineEdit(self)
+        self.inputbox.setFixedHeight(300)
         imageGenerationLayout.addWidget(self.inputbox)
 
         # Add a button
-        button = QPushButton('Generate Image', self)
-        button.clicked.connect(self.on_button_click)
-        imageGenerationLayout.addWidget(button)
+        imageGenerationLayout.addLayout(self.createImageButtons(centralWidget))
 
         rootLayout.addLayout(imageGenerationLayout, 1)
 
         # Add an interactable image viewer
-        lastImagePosix = self.get_latest_image_posix_in_repo()
+        lastImagePosix = self.repoManager.get_latest_image_posix_in_repo()
         self.imageViewer = ImageViewer(lastImagePosix)
         rootLayout.addWidget(self.imageViewer, 9)
 
@@ -61,38 +52,30 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(centralWidget)
 
 
-    def get_latest_image_posix_in_repo(self):
-        try:
-            imageDates = os.listdir(self.imageRepo)
-            lastImageDate = imageDates[0]
-            lastDateImagePrompts = os.listdir(self.imageRepo/lastImageDate)
-            lastImagePrompt = lastDateImagePrompts[0]
+    def createImageButtons(self, centralWidget) -> QHBoxLayout:
+        buttonLayout = QHBoxLayout(centralWidget)
 
-            lastImagePromptPosix = (self.imageRepo/lastImageDate/lastImagePrompt/"1.png").as_posix()
+        generateImageButton = QPushButton('Generate Image', self)
+        generateImageButton.clicked.connect(self.create_image_action)
 
-            logging.info("Found last image prompt of repo : " + lastImagePromptPosix)
-            return lastImagePromptPosix
-        except BaseException as e:
-            logging.error(e)
-            return None
+        recordVoiceButton = QPushButton('Record Voice Input', self)
+        recordVoiceButton.clicked.connect(self.record_voice_action)
 
+        buttonLayout.addWidget(generateImageButton)
+        buttonLayout.addWidget(recordVoiceButton)
 
-    def generate_png_path(self, prompt: str):
-        dateTimeSegments = get_current_sortable_datetime_strs()
-        dayDirectory = self.imageRepo/dateTimeSegments[0]
-        promptWithTime = dateTimeSegments[1] + "_" + prompt
-        if not os.path.exists(dayDirectory):
-            os.mkdir(dayDirectory)
-        if not os.path.exists(dayDirectory/promptWithTime):
-            os.mkdir(dayDirectory/promptWithTime)
-        return dayDirectory/promptWithTime/"1.png"
+        return buttonLayout
 
 
-    def on_button_click(self):
+    def create_image_action(self):
         prompt = self.inputbox.text()
         image = self.imageProvider.get_image_from_string(prompt)
-        pngPath = self.generate_png_path(prompt)
-        image.save(pngPath, "PNG")
+        pngPath = self.repoManager.save_image(prompt, image)
         self.imageViewer.replaceimage(pngPath.as_posix())
+
+
+    def record_voice_action(self):
+        transcription = self.speechRecognizer.transcribe()
+        self.inputbox.setText(transcription)
 
         

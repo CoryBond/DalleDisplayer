@@ -3,6 +3,8 @@ import os
 import sys
 from dependency_injector import containers, providers
 from imageProviders.DalleProvider import DalleProvider
+from repoManager.RepoManager import RepoManager
+from speechRecognition.GoogleSpeachRecognizer import GoogleSpeechRecognizer
 from ui.MainWindow import MainWindow
 from ui.UIApplication import UIApplication
 from utils.pathingUtils import get_project_root
@@ -41,9 +43,20 @@ class Container(containers.DeclarativeContainer):
     )
     # QGuiApplication.inputMethod().visibleChanged.connect(handleVisibleChanged)
 
+    speechRecognizer = providers.Singleton(
+        GoogleSpeechRecognizer
+    )
+
+    repoManager = providers.Singleton(
+        RepoManager,
+        imageProvider.provided.engine_name.call(),
+    )
+
     mainWindow = providers.Singleton(
         MainWindow,
-        imageProvider
+        imageProvider,
+        repoManager,
+        speechRecognizer
     )
 
     ui = providers.Singleton(
