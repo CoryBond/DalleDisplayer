@@ -17,8 +17,8 @@ class DalleProvider(ImageProvider):
         return
     
 
-    def name(self):
-        return "DalleProvider"
+    def engine_name(self):
+        return "Dall-e"
 
 
     def get_image_from_string(self, prompt, height=0, width=0) -> Image:

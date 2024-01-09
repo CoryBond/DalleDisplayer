@@ -18,7 +18,7 @@ def testImageGenerator():
 @patch('imageProviders.ImageProvider')
 def override(container: Container, imageProvider: ImageProvider):
 
-    imageProvider.name = lambda : "mockImageProvider"
+    imageProvider.engine_name = lambda : "mockGenerator"
     imageProvider.get_image_from_string = testImageGenerator()
 
     container.imageProvider.override(imageProvider)

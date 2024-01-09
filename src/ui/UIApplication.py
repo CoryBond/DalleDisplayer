@@ -23,5 +23,6 @@ class UIApplication():
     def start(self):
         logging.info("Starting UI")
 
+
         self.mainWindow.show()
         sys.exit(self.app.exec_())

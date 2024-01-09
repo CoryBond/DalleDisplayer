@@ -15,7 +15,8 @@ class ImageViewer(QGraphicsView):
         self.setDragMode(QGraphicsView.ScrollHandDrag)
 
         # Create a graphics view and scene
-        self.replaceimage(startingImage)
+        if startingImage is not None:
+            self.replaceimage(startingImage)
         
         # Enable pinch gestures
 
