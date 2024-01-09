@@ -11,9 +11,7 @@ class DalleProvider(ImageProvider):
     # inherits from Provider
     def __init__(self, key=None):
         super().__init__(key=key, keyname=key)
-
         self.openAiClient = openai.OpenAI(api_key=key)
-
         return
     
 
