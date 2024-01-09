@@ -19,7 +19,7 @@ class ImageProvider(object):
         return
     
 
-    def name(self) -> str:
+    def engine_name(self) -> str:
         return
 
 
