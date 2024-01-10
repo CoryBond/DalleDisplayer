@@ -1,28 +1,21 @@
 
 import logging
-from tkinter import *
-from PIL import ImageTk
-import os
-
-from imageProviders.ImageProvider import ImageProvider
-from ui.MainWindow import MainWindow
-
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel
-from PyQt5.QtGui import QPixmap
+
+from ui.MainWindow import MainWindow
+from ui.QApplicationManager import QApplicationManager
 
 class UIApplication():
 
 
-    def __init__(self, app, mainWindow):
-        self.app = app
+    def __init__(self, qApplicationCreator: QApplicationManager, mainWindow: MainWindow):
+        self.app = qApplicationCreator.getQApp()
         self.mainWindow = mainWindow
         return
-    
+
 
     def start(self):
         logging.info("Starting UI")
-
 
         self.mainWindow.show()
         sys.exit(self.app.exec_())
