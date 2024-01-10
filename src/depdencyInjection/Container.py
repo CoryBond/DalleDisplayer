@@ -1,28 +1,12 @@
-
-import os
-import sys
 from dependency_injector import containers, providers
 from imageProviders.DalleProvider import DalleProvider
 from repoManager.RepoManager import RepoManager
 from speechRecognition.GoogleSpeachRecognizer import GoogleSpeechRecognizer
 from ui.MainWindow import MainWindow
+from ui.QApplicationManager import QApplicationManager
 from ui.UIApplication import UIApplication
 from utils.pathingUtils import get_project_root
-from PyQt5.QtCore import QObject
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QGuiApplication, QRegion
 
-def handleVisibleChanged():
-    if not QGuiApplication.inputMethod().isVisible():
-        return
-    for w in QGuiApplication.allWindows():
-        if w.metaObject().className() == "QtVirtualKeyboard::InputView":
-            keyboard = w.findChild(QObject, "keyboard")
-            if keyboard is not None:
-                r = w.geometry()
-                r.moveTop(keyboard.property("y"))
-                w.setMask(QRegion(r))
-                return
 
 class Container(containers.DeclarativeContainer):
 
@@ -35,13 +19,9 @@ class Container(containers.DeclarativeContainer):
         key=dalleKey
     )
 
-    # Must always be made first in the QT framework! If not made first other QTWidgets will error.
-    os.environ["QT_IM_MODULE"] = "qtvirtualkeyboard"
-    app = providers.Singleton(
-        QApplication,
-        sys.argv
+    qApplicationManager = providers.Singleton(
+        QApplicationManager
     )
-    # QGuiApplication.inputMethod().visibleChanged.connect(handleVisibleChanged)
 
     speechRecognizer = providers.Singleton(
         GoogleSpeechRecognizer
@@ -61,6 +41,6 @@ class Container(containers.DeclarativeContainer):
 
     ui = providers.Singleton(
         UIApplication,
-        app,
+        qApplicationManager,
         mainWindow
     )
