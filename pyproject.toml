@@ -27,7 +27,7 @@ test = [
 
 
 [project.urls]
-Homepage = "https://github.com/CoryBond/DalleDisplayer"
+Homepage = "https://github.com/CoryBond/PAIID"
 
 
 [tool.pytest.ini_options]
