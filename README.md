@@ -21,12 +21,20 @@ This is a side project I am working on as I upgraded my retropie gaming system t
 ## Running The Program
 
 This project was built in Python3.9 on a Raspberry Pi 3 with a arm7 (32 bit) chipset. Python 3.9 is the default version used by the Raspberry Pi OS Bookworm.
-Its recommended to make a virtual python env with `Python3.9 -m env myenv`. Activate this virtual environment, install all necessary packages and run the entry file in `src/main.py`
+Its recommended to make a virtual python env with `Python3 -m venv myenv`. Activate this virtual environment, install all necessary packages and run the entry file in `src/main.py`
 
 ## 🏴󠁶󠁥󠁷󠁿 Dependencies
 
 Almost all python packages required by this project can be found in the requirements.txt and can be imported into a python environment using:
-`python3 -m pip install -r requirements.txt` after starting your pytho env `source myenv/bin/activate`.
+`pip install -r requirements.txt --verbose` after starting your pytho env `source myenv/bin/activate`.
+
+Some dependencies, especially PyQt don't have a wheel and take a long time to compile. If you `sudo apt install python3-pyqt5` and other libraries you can get around installing a virtual environment specific copy. You will need to modify the `my/pyenv.cfg` file to have
+
+```
+include-system-site-packages = true
+```
+
+in it
 
 ### Additional Package Installs
 
@@ -36,18 +44,18 @@ For example:
 
 | System | Package | Install Command                      | Required By        |
 | ------ | ------- | ------------------------------------ | ------------------ |
- sudo apt-get install qtvirtualkeyboard-plugin
- qml-module-qtquick-controls
- qml-module-qtquick-layouts
- qml-module-qt-labs-folderlistmodel
-
 | Linux  | PYQT5   | sudo apt install python3-pyqt5       | pyqt5              |
-| Linx   | tKinter | sudo apt-get install python3-tk      | tKinter            |
-| Linx   | tKinterImage | sudo apt-get install python3-pil python3-pil.imagetk      | tKinter            |
-| Linx   | PyAudio | sudo apt-get install python3-pyaudio | pyaudio            |
-| Linx   | Flac    | sudo apt-get install flac            | speech_recognition |
-| Linx   | ESpeak  | sudo apt-get install espeak          | speech_recognition |
+| Linux  | PYQT5   | sudo apt install qtbase5-dev       | pyqt5              |
+| Linux  | PYQT5-VirtualKeyboard   | sudo apt install qtvirtualkeyboard-plugin       | pyqt5              |
+| Linux  | PYQT5   | sudo apt install qml-module-qtquick-controls       | pyqt5              |
+| Linux  | PYQT5   | sudo apt install qml-module-qtquick-layouts       | pyqt5              |
+| Linux  | PYQT5   | sudo apt install qml-module-qt-labs-folderlistmodel       | pyqt5              |
+| Linux  | PYQT5   | sudo apt install python3-pyqt5       | pyqt5              |
+| Linux   | PyAudio | sudo apt-get install python3-pyaudio | pyaudio            |
+| Linux   | Flac    | sudo apt-get install flac            | speech_recognition |
+| Linux   | ESpeak  | sudo apt-get install espeak          | speech_recognition |
 
+And there maybe more beyond listed here. It depends on your system and if the existing libraries already are installed are not unfortunately. PyQt, being a wrapper around the c++ Qt, will need to have a lot of external dependencies installed.
 
 ### PiWheels
 
