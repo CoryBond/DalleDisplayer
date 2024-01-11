@@ -1,11 +1,12 @@
-from unittest.mock import patch, MagicMock                                       
+from unittest.mock import patch                                       
 from depdencyInjection.Container import Container
 from imageProviders.ImageProvider import ImageProvider
 from PIL import Image
 
 from utils.pathingUtils import get_project_root
 
-def testImageGenerator():
+
+def test_image_generator():
         i = 0
         def cb(prompt: str) -> Image:
             nonlocal i 
@@ -16,10 +17,10 @@ def testImageGenerator():
 
 
 @patch('imageProviders.ImageProvider')
-def override(container: Container, imageProvider: ImageProvider):
+def override_with_mock_image_provider(container: Container, imageProvider: ImageProvider):
 
     imageProvider.engine_name = lambda : "mockGenerator"
-    imageProvider.get_image_from_string = testImageGenerator()
+    imageProvider.get_image_from_string = test_image_generator()
 
     container.imageProvider.override(imageProvider)
     return

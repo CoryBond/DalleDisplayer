@@ -1,4 +1,12 @@
 from PIL import Image
+from typing import TypedDict
+
+
+ImageProviderResult = TypedDict('ImageProviderResult', {
+    'img': Image.Image,
+    'errorMessage': str,
+})
+
 
 class ImageProvider(object):
     """
@@ -23,5 +31,5 @@ class ImageProvider(object):
         return
 
 
-    def get_image_from_string(self, text) -> Image:
+    def get_image_from_string(self, text) -> ImageProviderResult:
         return
