@@ -1,12 +1,13 @@
 import logging
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QHBoxLayout, QVBoxLayout, QTextEdit, QWidget, QGroupBox
+
 from imageProviders.ImageProvider import ImageProvider
 from repoManager.RepoManager import RepoManager
 from speechRecognition.SpeechRegonizer import SpeechRecognizer
-from ui.ImageViewer import ImageViewer
+from ui.widgets.ImageViewer import ImageViewer
+from ui.dialogs.RecorderDialog import RecorderDialog
+from ui.dialogs.ErrorMessage import ErrorMessage
 
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QHBoxLayout, QVBoxLayout, QTextEdit, QWidget, QGroupBox, QDialog
-
-from ui.RecorderDialog import RecorderDialog
 
 class MainWindow(QMainWindow):
 
@@ -102,9 +103,14 @@ class MainWindow(QMainWindow):
     def create_image_action(self):
         self.toggle_disabled_prompting(True)
         prompt = self.promptbox.toPlainText()
-        image = self.imageProvider.get_image_from_string(prompt)
-        pngPath = self.repoManager.save_image(prompt, image)
-        self.imageViewer.replaceimage(pngPath.as_posix())
+        response = self.imageProvider.get_image_from_string(prompt)
+        
+        if response['errorMessage'] != None:
+            ErrorMessage(response['errorMessage']).exec()
+        else:
+            pngPath = self.repoManager.save_image(prompt, response['img'])
+            self.imageViewer.replaceimage(pngPath.as_posix())
+        
         self.toggle_disabled_prompting(False)
 
 

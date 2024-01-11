@@ -1,9 +1,11 @@
 from io import BytesIO
 import logging
+from typing import cast
 import openai
 import requests
-from imageProviders.ImageProvider import ImageProvider
+from imageProviders.ImageProvider import ImageProvider, ImageProviderResult
 from PIL import Image
+
 
 class DalleProvider(ImageProvider):
 
@@ -19,8 +21,10 @@ class DalleProvider(ImageProvider):
         return "Dall-e"
 
 
-    def get_image_from_string(self, prompt, height=0, width=0) -> Image:
+    def get_image_from_string(self, prompt, height=0, width=0) -> ImageProviderResult:
         logging.info("Generating image for prompt : " + prompt)
+        img = None
+        errorMessage = None
         try:
             # Select appropriate size from options in
             # res = list(DalleConst.SIZES.value.keys())[0]
@@ -43,8 +47,20 @@ class DalleProvider(ImageProvider):
             logging.info("Generated image at : " + url)
             img = Image.open(BytesIO(requests.get(url).content))
 
+        except openai.APIConnectionError as e:
+            logging.error(e)
+            errorMessage = "Unable to contact OpenAI. Internet or provider may be down."
+        except openai.AuthenticationError as e:
+            logging.error(e)
+            errorMessage = "Error authenticating with OpenAI. Please check your credentials in '.creds'."
+        except openai.RateLimitError as e:
+            logging.error(e)
+            errorMessage = "OpenAI reporting Rate Limiting. Please check your account at openai.com."
+        except openai.APITimeoutError as e:
+            logging.error(e)            
+            errorMessage = "Timeout contacting OpenAI. Internet or provider may be down."
         except BaseException as e:
             logging.error(e)
-            return None
+            errorMessage = str(e)
         
-        return img
+        return { 'img': img, 'errorMessage': errorMessage }

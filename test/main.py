@@ -3,11 +3,12 @@ import logging
 from pathlib import Path
 
 import sys
+
 sys.path.append(Path(__file__).parent.parent.as_posix()+"/src") # Add src directory to python path so we can access src modules
 print(sys.path)
 
 from depdencyInjection.Container import Container
-from utils.dependencyInjectionUtils import override
+from dependencyInjection.containerTestUtil import override_with_mock_image_provider
 
 from utils.loggingUtils import configureBasicLogger
 
@@ -17,7 +18,7 @@ configureBasicLogger(filename="test_aiImageDisplayer.log", level=logging.DEBUG)
 
 def main() -> None:
     container = Container()
-    override(container)
+    override_with_mock_image_provider(container)
 
     container.ui().start()
 

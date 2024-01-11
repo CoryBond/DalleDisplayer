@@ -2,7 +2,7 @@ from dependency_injector import containers, providers
 from imageProviders.DalleProvider import DalleProvider
 from repoManager.RepoManager import RepoManager
 from speechRecognition.GoogleSpeachRecognizer import GoogleSpeechRecognizer
-from ui.MainWindow import MainWindow
+from ui.widgets.MainWindow import MainWindow
 from ui.QApplicationManager import QApplicationManager
 from ui.UIApplication import UIApplication
 from utils.pathingUtils import get_project_root

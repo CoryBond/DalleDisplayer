@@ -2,7 +2,7 @@
 import logging
 import sys
 
-from ui.MainWindow import MainWindow
+from ui.widgets.MainWindow import MainWindow
 from ui.QApplicationManager import QApplicationManager
 
 class UIApplication():
