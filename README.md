@@ -1,6 +1,6 @@
-# 🍱 DalleDisplayer
+# 🍱 PAIID
 
-DalleDisplayer is a program originally designed for a single board computer (a raspberry pi 3 specifically) that displays Dalle Images to a connected screen. It is planned to support voice commands, touch screens and remote commands. These will all be incremental features!
+The Pi AI Image Displayer is a program originally designed for a single board computer (a raspberry pi 3 specifically) that displays Ai Generated Images to a connected screen. It is planned to support voice commands, touch screens and remote commands. These will all be incremental features!
 
 This is a side project I am working on as I upgraded my retropie gaming system to the new raspbery pi 5 and want to do a cool project with my old raspberry pi 3. In particular I am interested in doing something AI related as the latest developments in AI tools (like ChatGPT 4) seem to have lots of pratical utility in peoples lives. Setting aside the controversies arising from AI tools I want to get more involved in developing with them both for my job and for fun.
 
@@ -8,15 +8,15 @@ This is a side project I am working on as I upgraded my retropie gaming system t
 
 1. Run a python GUI on a monitor [✅]
 2. Create a git repo for the project [✅]
-3. Boot the DalleDisplayer GUI on device start [✅]
+3. Boot the PAIID GUI on device start [✅]
 4. Connect 7 inch touchscreen display to the pi [✅]
 5. Boot GUI to connected touchscreen [✅]
 6. Wire the touchscreen to the board [✅]
 7. Install the Dalle Python client. [✅]
 8. Pay for a client subscription. [✅]
-9. Display Dalle Images to screen via hardcoded prompts.
+9. Display Dalle Images to screen via hardcoded prompts. [✅]
 10. Connect usb microphone to the device (might be more difficult then it ... sounds) [✅]
-11. Support voice commands when a user touches a "make image" button.
+11. Support voice commands when a user touches a "make image" button. [✅]
 
 ## Running The Program
 
@@ -39,7 +39,7 @@ in it
 ### Additional Package Installs
 
 Some packages, like speech_recognition, also require additional system specific packages if they don't already exist. You might have to install
-these manually prior to using DalleDisplayer.
+these manually prior to using PAIID.
 For example:
 
 | System | Package | Install Command                      | Required By        |
@@ -82,19 +82,19 @@ Before you can display this program onto a connected monitor you must first setu
 1. Install xinit openbox
    (NOTE: [xinit](https://en.wikipedia.org/wiki/Xinit) is display server while [openbox]() is a graphical window manager. Together these will allow rendering the python GUI to a connected monitor. )
 2. Create a directory/file called at `~/.config/openbox/autostart`
-   1. Add an entry in that file as ` ~path_to_DalleDisplayer_root~/myenv/bin/python ~path_to_DalleDisplayer_root~/src/main.py` (autostart runs everytime the openbox-session [not the openbox command line] runs)
+   1. Add an entry in that file as ` ~path_to_PAIID_root~/myenv/bin/python ~path_to_PAIID_root~/src/main.py` (autostart runs everytime the openbox-session [not the openbox command line] runs)
 
-After following these steps you can now run `xinit openbox-session` and it will should start up the DalleDisplayer and render the GUI to the connected monitor.
-If the DalleDisplayer closes while openbox-session is still up you can do a few things to restart it:
+After following these steps you can now run `xinit openbox-session` and it will should start up the PAIID and render the GUI to the connected monitor.
+If the PAIID closes while openbox-session is still up you can do a few things to restart it:
 
 1. Restart xinit + openbox
-2. Run the script directly while openbox session is open with `DISPLAY=:0.0 python3 ~path_to_DalleDisplayer_root~/src/main.py`
+2. Run the script directly while openbox session is open with `DISPLAY=:0.0 python3 ~path_to_PAIID_root~/src/main.py`
 
 #### Boot
 
-Several linux tools allow xinit + openbox + DalleDisplayer to start at boot though I recommend using crontab. Using rc.local to load startx did not cause openbox to detect the user specific `~/.config/openbox/autostart`` script.
+Several linux tools allow xinit + openbox + PAIID to start at boot though I recommend using crontab. Using rc.local to load startx did not cause openbox to detect the user specific `~/.config/openbox/autostart`` script.
 
-After opening `crontab -e` all you need to do is add a line like `@reboot xinit openbox-session`. If you also setup DalleDisplayer in the openbox autostart file then it will load at boot as well.
+After opening `crontab -e` all you need to do is add a line like `@reboot xinit openbox-session`. If you also setup PAIID in the openbox autostart file then it will load at boot as well.
 
 #### Script
 
