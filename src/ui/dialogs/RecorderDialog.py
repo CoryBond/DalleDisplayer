@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap
 
 from speechRecognition.SpeechRegonizer import SpeechRecognizer
+from utils.pathingUtils import get_or_create_image_resources
 
 
 class RecorderDialog(QDialog):
@@ -28,7 +29,7 @@ class RecorderDialog(QDialog):
 
         self.contentLayout = QHBoxLayout()
 
-        recorderPixmap = QPixmap("/home/pi/python/DalleDisplayer/resources/images/preview.png")
+        recorderPixmap = QPixmap((get_or_create_image_resources()/"preview.png").as_posix())
         recorderLabel = QLabel()
         recorderLabel.setPixmap(recorderPixmap)
         self.contentLayout.addWidget(recorderLabel)

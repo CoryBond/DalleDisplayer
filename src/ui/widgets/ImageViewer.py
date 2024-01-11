@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QPinchGesture, QGraphicsItem
+from PyQt5.QtWidgets import QSplashScreen, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QPinchGesture, QGraphicsItem
 from PyQt5.QtCore import QRectF
 from PyQt5.QtGui import QPixmap, QTransform
 
@@ -32,6 +32,8 @@ class ImageViewer(QGraphicsView):
 
         # Add an image to the scene
         pixmap = QPixmap(imagePath)  # Replace with the path to your image
+        splash = QSplashScreen(pixmap)
+        splash.show()
         self.pixmapItem = QGraphicsPixmapItem(pixmap)
         self.pixmapItem.setFlag(QGraphicsItem.ItemIsMovable)
 
