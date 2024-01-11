@@ -1,0 +1,35 @@
+[project]
+name="PAIID"
+version = "0.0.1"
+authors = [
+  { name="Cory Bond", email="cb.cobond@gmail.com" },
+]
+description = "A AI image generator for raspberry pi"
+readme = "README.md"
+requires-python = "==3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+]
+dependencies  = [
+  "dependency_injector",
+  "qdarkstyle",
+  "requests",
+  "SpeechRecognition"
+]
+
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-qt"
+]
+
+
+[project.urls]
+Homepage = "https://github.com/CoryBond/DalleDisplayer"
+
+
+[tool.pytest.ini_options]
+pythonpath = "src"
+qt_api="pyqt5"

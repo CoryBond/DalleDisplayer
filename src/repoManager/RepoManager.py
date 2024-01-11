@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 from utils.dateUtils import get_current_sortable_datetime_strs
-from utils.pathingUtils import get_image_repos
+from utils.pathingUtils import get_or_create_image_repos
 from PIL import Image
 
 
@@ -16,20 +16,18 @@ class RepoManager(object):
 
 
     def switch_repo(self, newRepo: str):
-        self.imageRepo = get_image_repos()/newRepo
-        if not os.path.exists(self.imageRepo):
-            os.mkdir(self.imageRepo)
+        self.imageRepo = get_or_create_image_repos()/newRepo
 
 
     def generate_png_path(self, prompt: str) -> Path:
         dateTimeSegments = get_current_sortable_datetime_strs()
         dayDirectory = self.imageRepo/dateTimeSegments[0]
+
         promptWithTime = dateTimeSegments[1] + "_" + prompt
-        if not os.path.exists(dayDirectory):
-            os.mkdir(dayDirectory)
-        if not os.path.exists(dayDirectory/promptWithTime):
-            os.mkdir(dayDirectory/promptWithTime)
-        return dayDirectory/promptWithTime/"1.png"
+        promptAbsPath = dayDirectory/promptWithTime
+        promptAbsPath.mkdir( parents=True, exist_ok=True )
+
+        return promptAbsPath/"1.png"
 
     
     def get_latest_image_posix_in_repo(self):
@@ -39,7 +37,9 @@ class RepoManager(object):
             lastDateImagePrompts = os.listdir(self.imageRepo/lastImageDate)
             lastImagePrompt = lastDateImagePrompts[0]
 
-            lastImagePromptPosix = (self.imageRepo/lastImageDate/lastImagePrompt/"1.png").as_posix()
+            pathToLastImagePrompt = self.imageRepo/lastImageDate/lastImagePrompt
+
+            lastImagePromptPosix = (pathToLastImagePrompt/"1.png").as_posix()
 
             logging.info("Found last image prompt of repo : " + lastImagePromptPosix)
             return lastImagePromptPosix

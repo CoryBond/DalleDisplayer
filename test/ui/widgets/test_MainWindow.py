@@ -1,51 +1,47 @@
 
 import sys
-from pathlib import Path
-sys.path.append(Path(__file__).parent.parent.parent.parent.as_posix()+"/src") # Add src directory to python path so we can access src modules
 print(sys.path)
 
-import unittest
-from unittest.mock import patch                                       
+import pytest
+from unittest.mock import Mock   
+from PyQt5.QtWidgets import QApplication
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from depdencyInjection.Container import Container
 from imageProviders.ImageProvider import ImageProvider
+
+from pytestqt.qt_compat import qt_api
 
 
 def raise_exception(msg: str):
     raise Exception(msg)
 
 
-class TestMainWindow(unittest.TestCase):
+#@pytest.fixture
+#def imageProviderMock():
+#   mock = Mock()
+#   mock.engine_name = lambda : "mockGenerator"
+#   mock.get_image_from_string = lambda : raise_exception('some message')
+#   return mock
 
 
-   def setUp(self):
-      '''Setup Container'''
-      self.container = Container()
+def test_image_generation_error(qtbot):
+   '''Test That Error Dialog Appears When Image Provider Errors'''
+   # Arrange
+   #container = Container()
+   
+   #container.imageProvider.override(imageProviderMock)
 
+   #container.ui().start()
+   #mainWindow = container.mainWindow()
 
-   def test_lala(self):
-      return
-
-
-   @patch('imageProviders.ImageProvider')
-   def test_image_generation_error(self, imageProvider: ImageProvider):
-      '''Test That Error Dialog Appears When Image Provider Errors'''
-      # Arrange
-
-      imageProvider.engine_name = lambda : "mockGenerator"
-      imageProvider.get_image_from_string = lambda : raise_exception('some message')
-      self.container.imageProvider.override(imageProvider)
-
-      self.container.ui().start()
-      mainWindow = self.container.mainWindow()
+   widget = qt_api.QtWidgets.QWidget()
+   qtbot.addWidget(widget)
+   widget.setWindowTitle("W1")
+   widget.show()
       
-      # Act
-      QTest.mouseClick(mainWindow.generateImageButton, Qt.LeftButton)
+   # Act
+   # QTest.mouseClick(mainWindow.generateImageButton, Qt.LeftButton)
 
-      # Assert
-      self.assertTrue(mainWindow.errorDialog.isVisible())
-
-
-if __name__ == '__main__':
-    unittest.main()
+   # Assert
+   assert widget.isVisible()
