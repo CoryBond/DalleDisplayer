@@ -5,11 +5,12 @@ import sys
 from ui.widgets.MainWindow import MainWindow
 from ui.QApplicationManager import QApplicationManager
 
+
 class UIApplication():
 
 
-    def __init__(self, qApplicationCreator: QApplicationManager, mainWindow: MainWindow):
-        self.app = qApplicationCreator.getQApp()
+    def __init__(self, qApplicationManager: QApplicationManager, mainWindow: MainWindow):
+        self.app = qApplicationManager.getQApp()
         self.mainWindow = mainWindow
         return
 

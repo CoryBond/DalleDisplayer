@@ -1,3 +1,4 @@
+import time
 from unittest.mock import patch                                       
 from depdencyInjection.Container import Container
 from imageProviders.ImageProvider import ImageProvider
@@ -8,11 +9,13 @@ from utils.pathingUtils import get_project_root
 
 def test_image_generator():
         i = 0
+        time.sleep(6)
         def cb(prompt: str) -> Image:
             nonlocal i 
             i += 1
             testFile = "test1.png" if i % 2 == 0 else "test2.png"
-            return Image.open(get_project_root()/'..'/'testResources'/'images'/'ai'/testFile)
+            img = Image.open(get_project_root()/'..'/'testResources'/'images'/'ai'/testFile)
+            return { 'img': img, 'errorMessage': None }
         return cb
 
 

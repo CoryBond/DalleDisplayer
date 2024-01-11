@@ -17,7 +17,7 @@ class ImageProvider(object):
 
     Methods
     -------
-    get_image_from_string(text)
+    get_image_from_string(prompt)
         Retrieves image from API. Returns PIL Image object. Returns 'None' object on failure
     """
     def __init__(self, key=None, keyname=None):
@@ -31,5 +31,6 @@ class ImageProvider(object):
         return
 
 
-    def get_image_from_string(self, text) -> ImageProviderResult:
+    def get_image_from_string(self, prompt) -> ImageProviderResult:
         return
+    

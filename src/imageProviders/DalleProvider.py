@@ -21,7 +21,7 @@ class DalleProvider(ImageProvider):
         return "Dall-e"
 
 
-    def get_image_from_string(self, prompt, height=0, width=0) -> ImageProviderResult:
+    def get_image_from_string(self, prompt) -> ImageProviderResult:
         logging.info("Generating image for prompt : " + prompt)
         img = None
         errorMessage = None
@@ -64,3 +64,4 @@ class DalleProvider(ImageProvider):
             errorMessage = str(e)
         
         return { 'img': img, 'errorMessage': errorMessage }
+    
