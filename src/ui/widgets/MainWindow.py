@@ -146,7 +146,7 @@ class MainWindow(QMainWindow):
             ErrorMessage(response['errorMessage']).exec()
         else:
             pngPath = self.repoManager.save_image(prompt, response['img'])
-            self.imageViewer.replaceimage(pngPath.as_posix())
+            self.imageViewer.replace_image(pngPath.as_posix())
         
         self.loadingScreen.stop()
         self.toggle_disabled_prompting(False)
