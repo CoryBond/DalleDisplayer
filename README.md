@@ -28,13 +28,13 @@ Its recommended to make a virtual python env with `Python3 -m venv myenv`. Activ
 Almost all python packages required by this project can be found in the requirements.txt and can be imported into a python environment using:
 `pip install -r requirements.txt --verbose` after starting your pytho env `source myenv/bin/activate`.
 
-Some dependencies, especially PyQt don't have a wheel and take a long time to compile. If you `sudo apt install python3-pyqt5` and other libraries you can get around installing a virtual environment specific copy. You will need to modify the `my/pyenv.cfg` file to have
+Some dependencies, especially PyQt don't have a wheel (at least not for my machine) and take a long time to compile. If you `sudo apt install python3-pyqt5` the pyqt5 binary and other adjacent libraries you can get around installing a virtual environment specific copy. You will need to modify the `my/pyenv.cfg` file to have
 
 ```
 include-system-site-packages = true
 ```
 
-in it
+in it though.
 
 ### Additional Package Installs
 
@@ -59,7 +59,7 @@ And there maybe more beyond listed here. It depends on your system and if the ex
 
 ### PiWheels
 
-Newer versions of packages, specifically numpy, can take absurd amounts of time to compile and download on a rasbperry pi. To avoid this only use the numpy version specified in the requirements file and setup pre-compiled pi [wheels](https://www.piwheels.org/) installations in the `etc/pip.config`.
+Newer versions of packages can take absurd amounts of time to compile and download on a rasbperry pi. To avoid this only use the numpy version specified in the requirements file and setup pre-compiled pi [wheels](https://www.piwheels.org/) installations in the `etc/pip.config`.
 
 ## 📶 How to display GUI through SSH / Remote VSCode
 
