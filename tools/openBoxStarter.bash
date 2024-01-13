@@ -16,4 +16,4 @@ kill $(ps aux | grep 'openbox' | awk '{print $2}')
 
 echo starting openbox with python application
 
-DISPLAY=:0.0 openbox --debug --startup "python3 $HOME/python/DalleDisplayer/${subPath}/main.py"
+DISPLAY=:0.0 openbox --debug --startup "python3 $HOME/python/PAIID/${subPath}/main.py"
