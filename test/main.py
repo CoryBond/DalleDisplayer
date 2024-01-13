@@ -20,7 +20,7 @@ def main() -> None:
     container = Container()
     override_with_mock_image_provider(container)
 
-    container.ui().start()
+    container.uiOrchestrator().start()
 
 
 if __name__ == "__main__":
