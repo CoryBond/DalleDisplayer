@@ -141,6 +141,8 @@ class MainWindow(QMainWindow):
 
     def load_image_response(self, prompt: str, response: ImageProviderResult):        
         if response['errorMessage'] != None:
+            # Remove loading Screen so it doesn't overlap the error message
+            self.loadingScreen.stop()
             ErrorMessage(response['errorMessage']).exec()
         else:
             pngPath = self.repoManager.save_image(prompt, response['img'])

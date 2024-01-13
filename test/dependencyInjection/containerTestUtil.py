@@ -9,10 +9,10 @@ from utils.pathingUtils import get_project_root
 
 def test_image_generator():
         i = 0
-        time.sleep(6)
         def cb(prompt: str) -> Image:
             nonlocal i 
             i += 1
+            time.sleep(4)
             testFile = "test1.png" if i % 2 == 0 else "test2.png"
             img = Image.open(get_project_root()/'..'/'testResources'/'images'/'ai'/testFile)
             return { 'img': img, 'errorMessage': None }

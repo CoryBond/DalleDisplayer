@@ -4,7 +4,7 @@ from repoManager.RepoManager import RepoManager
 from speechRecognition.GoogleSpeachRecognizer import GoogleSpeechRecognizer
 from ui.widgets.MainWindow import MainWindow
 from ui.QApplicationManager import QApplicationManager
-from ui.UIApplication import UIApplication
+from ui.UIOrchestrator import UIOrchestrator
 from utils.pathingUtils import get_project_root
 
 
@@ -39,8 +39,8 @@ class Container(containers.DeclarativeContainer):
         speechRecognizer
     )
 
-    ui = providers.Singleton(
-        UIApplication,
+    uiOrchestrator = providers.Singleton(
+        UIOrchestrator,
         qApplicationManager,
         mainWindow
     )

@@ -6,7 +6,7 @@ from ui.widgets.MainWindow import MainWindow
 from ui.QApplicationManager import QApplicationManager
 
 
-class UIApplication():
+class UIOrchestrator():
 
 
     def __init__(self, qApplicationManager: QApplicationManager, mainWindow: MainWindow):

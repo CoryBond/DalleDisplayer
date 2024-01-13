@@ -8,7 +8,7 @@ configureBasicLogger()
 
 def main() -> None:
     container = Container()
-    container.ui().start()
+    container.uiOrchestrator().start()
 
 
 if __name__ == "__main__":
