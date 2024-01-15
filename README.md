@@ -177,7 +177,7 @@ that uses xinit to recalibrate the input. Simply install [xinput_calibrator](xin
 
 ## 🧪 Tests
 
-There is included a test package of pytests for various functions and classes used throughout the project. To run tests either run `pytest`` normally or with increased verbosity with `pytest -vv -s`
+There is included a test package of pytests for various functions and classes used throughout the project. To run tests either run `pytest` normally or with increased verbosity with `pytest -vv -s`
 
 ### Dev UI
 
