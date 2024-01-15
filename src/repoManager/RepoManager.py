@@ -8,7 +8,17 @@ from PIL import Image
 
 
 class RepoManager(object):
+    """
+    Class that manages a colleciton of AI image repositories set in a local file system.
 
+    AI Image repos are saved by directory under "$HOME/PAIID/resources/imageRepos". Within each repo images
+    are partitioned by date first. Per date the images are saved together under the prompt and time they were generated.
+    So, for example, if we have a prompt "Sad rat" generate 2 images then they can be saved under the following path:
+    "$HOME/PAIID/resources/imageRepos/Dall-e/2024-01-11/15:05:06.713451_Sad rat"
+
+    When saving with this repo manager the entire path will be created and images will be stored there. Currently this
+    repo manager does not allow configuring where imageRepos are managed.
+    """
 
     def __init__(self, startingRepo: str):
         self.switch_repo(startingRepo)
@@ -44,7 +54,7 @@ class RepoManager(object):
             logging.info("Found last image prompt of repo : " + lastImagePromptPosix)
             return lastImagePromptPosix
         except BaseException as e:
-            logging.error(e)
+            logging.warning(e)
             return None
 
 

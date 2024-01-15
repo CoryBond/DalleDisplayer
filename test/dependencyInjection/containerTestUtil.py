@@ -8,6 +8,11 @@ from utils.pathingUtils import get_project_root
 
 
 def test_image_generator():
+        """
+        Simulates a image getting generting by loading an existing image from the testResources folder.
+        Will also simulate "lag" by sleeping the current thread.
+        Should be run in a seperate thread as to prevent UI event loop from being freezed as well.
+        """
         i = 0
         def cb(prompt: str) -> Image:
             nonlocal i 
@@ -21,7 +26,9 @@ def test_image_generator():
 
 @patch('imageProviders.ImageProvider')
 def override_with_mock_image_provider(container: Container, imageProvider: ImageProvider):
-
+    """
+    Creates a generic mock of ImageProvider and adds it to the dependency injection container
+    """
     imageProvider.engine_name = lambda : "mockGenerator"
     imageProvider.get_image_from_string = test_image_generator()
 

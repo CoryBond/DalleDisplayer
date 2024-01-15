@@ -1,10 +1,12 @@
 # 🍱 PAIID
 
-The Pi AI Image Displayer is a program originally designed for a single board computer (a raspberry pi 3 specifically) that displays Ai Generated Images to a connected screen. It is planned to support voice commands, touch screens and remote commands. These will all be incremental features!
+The Pi AI Image Displayer is a program originally designed for a single board computer (a raspberry pi 3 specifically) that displays Ai Generated Images to a connected screen. PAIID is currently in 1.0 release with all original project features added. 
 
-This is a side project I am working on as I upgraded my retropie gaming system to the new raspbery pi 5 and want to do a cool project with my old raspberry pi 3. In particular I am interested in doing something AI related as the latest developments in AI tools (like ChatGPT 4) seem to have lots of pratical utility in peoples lives. Setting aside the controversies arising from AI tools I want to get more involved in developing with them both for my job and for fun.
+This is a side project I am working on as I upgraded my retropie gaming system to the new raspbery pi 5 and want to do a cool project with my old raspberry pi 3. In particular I am interested in doing something AI related as the latest developments in AI tools (like ChatGPT 4) seem to have lots of pratical utility in peoples lives. Setting aside the controversies arising from AI tools I want to get more involved in developing with them both for my professional work and for fun.
 
 ## 🗺️ Roadmap
+
+**Version 1.0** [✅]
 
 1. Run a python GUI on a monitor [✅]
 2. Create a git repo for the project [✅]
@@ -17,6 +19,66 @@ This is a side project I am working on as I upgraded my retropie gaming system t
 9. Display Dalle Images to screen via hardcoded prompts. [✅]
 10. Connect usb microphone to the device (might be more difficult then it ... sounds) [✅]
 11. Support voice commands when a user touches a "make image" button. [✅]
+12. Allow users to type in prompts via virtual keyboard [✅]
+13. Creating loading ~~screen~~ popup that tells the user to wait (also have all controls disbaled) [✅]
+14. Error messages when generating an image goes wrong. [✅]
+15. Zoom into images with touch gestures [✅]
+16. Pan images on image viewer [✅]
+17. Clear prompt button [✅]
+18. Replace tkinker qith PyQT [✅]
+  * Tkinker doesn't currently support touch gestures though there is a draft for it : https://core.tcl-lang.org/tips/doc/trunk/tip/570.md
+
+**Version 2.0**
+
+Featrues:
+
+1. Menu Bar containing:
+  1. Home
+  2. Gallery
+  3. Settings
+2. Refactor MainWindow content between a QT MainWindow and a "Home Widget" making it possible to switch between pages in the MainWindow
+3. Refactor current MainWindow (Home Widget) into 3 seperate widgets:
+  1. Image Generator Sidebar
+  2. Image Viewer (already exists)
+  3. AI Result Meta Sidebar
+4. Image Generator
+  1. Add Image Generator Control To Select Engine (default Dalle-3)
+    1. Does not need implementation. Can be forced to use Dalle-3 for now.
+  2. Add ability to select how many images to make per request
+    1. Does not need implementation. Can be just "1" for Dalle-3.
+  3. Refactor Image Generator to allow pluginable controls per engine (options may differ per engine)
+  4. Turn Image Generator into a sidebar for a better UX experience
+5. AI Result Meta Sidbar
+  1. Takes in the current meta info (prompt, current image num, date created, time created, engine used)
+  2. Option to select 1-4+ images that were generated for the prompt at the given dateTime with the engine
+    1. Selection modifies what is shown in ImageViewer at any one point
+    2. Updates the num selection info in the AI Result Meta Sidebar
+    3. Sidebar can be collapsed and re-expanded if needed or not
+6. Gallery
+  1. Menu item switches from the Home page to the Gallery
+  2. Gallery is layed out by prompt + timestamp
+  3. Under each unique section you can see preview images of the actual images created
+  4. Selecting any image loads the image into Home, populating the Image Viewer and The AI Result Meta Sidebar whiel auto-hiding the Image Creator sidebar
+7. Settings does nothing for now
+  1. Potential backlog in future versions:
+    1. Switch theme
+    2. Add wifi (increase PAIID mobility)
+
+
+Additional Stretch Goals (not required for 2.0 release):
+
+1. Replace or improve voice input
+  1. Use another tool besides the Google AI.
+  2. Maybe buy tokens for a better service.
+  3. Make it more clear if a transcription faild and the user needs to repeat themselves.
+
+Bug Fixes:
+
+1. Make it so the loading popup doesn't go away if the user clicks out of it
+2. Fix pytest that run against QT (currenty facing xxxxx error)
+3. Recorder dialog sometimes hangs or crashes when try to open it. 
+  * Might be the previous recording still hasn't closed yet from the last dialog
+  * Might need to pre-load only 1 dialog or handle some way for the SpeechRecognizer to wait until the last recording session has ended.
 
 ## Running The Program
 
@@ -110,21 +172,10 @@ Simply run the script with `startx ./tools/openBoxStarter.bash`.
 For touchscreens its possible for the input to off.... sometimes very off. In a headless environment there is a tool
 that uses xinit to recalibrate the input. Simply install [xinput_calibrator](xinput_calibrator) and run it with `startx`
 
-## Tests
+## 🧪 Tests
 
-There is included a test package of pytests for various functions and classes used throughout the project. 
+There is included a test package of pytests for various functions and classes used throughout the project. To run tests either run `pytest`` normally or with increased verbosity with `pytest -vv -s`
+
+### Dev UI
 
 There exists a test UI which uses mock APIs rather then real ones for dev purposes. Simply run the application in this mode run the openbox script with the t flag (ex: `startx ./tools/openBoxStarter.bash -t`)
-
-
-
-
-
-
-
-
-
-
-## SCRAP
-
-tkinker doesn't support touch gestures though there is a draft for it : https://core.tcl-lang.org/tips/doc/trunk/tip/570.md

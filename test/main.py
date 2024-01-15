@@ -17,6 +17,11 @@ configureBasicLogger(filename="test_aiImageDisplayer.log", level=logging.DEBUG)
 
 
 def main() -> None:
+    """
+    A developer UI that can be run rather then the main entry point from the source path.
+
+    Will replace real API calling services with mock versions that simulate the behaviors the developer wants to see.
+    """
     container = Container()
     override_with_mock_image_provider(container)
 

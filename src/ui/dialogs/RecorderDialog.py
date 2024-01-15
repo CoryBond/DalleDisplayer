@@ -8,6 +8,23 @@ from utils.pathingUtils import get_or_create_image_resources
 
 
 class RecorderDialog(QDialog):
+    """
+    A dialog that immediatly starts recording transcriptions and will stop once the user accepts or closes the dialog.
+    
+    User audio is concurrently transcriped to a text transcription while the dialog is running. This text transcription will continiously
+    show being updated within the dialog as its available.
+
+    RecorderDialogs should not run at the same time as to prvent audio overlap.
+
+    NOTE: Current RecorderDialog image/icon is a bit too big and might be causing minor lag.
+
+    Attributes
+    ----------
+
+    Methods
+    ----------
+   
+    """
     # Becaues QT widgets can't be updated via multi-threading... but Signals + Slots are thread safe we use that to communicate between the speech recognizer and this dialog
     transcribeEvent = pyqtSignal()
 

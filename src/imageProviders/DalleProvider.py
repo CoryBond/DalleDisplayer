@@ -8,7 +8,17 @@ from PIL import Image
 
 
 class DalleProvider(ImageProvider):
+    """
+    A superclass used to wrap APIs for web operations.
 
+    Attributes
+    ----------
+
+    Methods
+    -------
+    get_image_from_string(prompt)
+        Retrieves image from API. Returns PIL Image object. Returns 'None' object on failure
+    """
 
     # inherits from Provider
     def __init__(self, key=None):

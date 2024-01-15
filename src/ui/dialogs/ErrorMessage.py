@@ -3,6 +3,15 @@ from PyQt5.QtCore import Qt
 
 
 class ErrorMessage(QMessageBox):
+    """
+    Simple error message when AI image generation fails
+
+    Attributes
+    ----------
+
+    Methods
+    ----------
+    """
 
     def __init__(self, message: str):
         super().__init__()
