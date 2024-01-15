@@ -73,6 +73,7 @@ Additional Stretch Goals (not required for 2.0 release):
   1. Use another tool besides the Google AI.
   2. Maybe buy tokens for a better service.
   3. Make it more clear if a transcription faild and the user needs to repeat themselves.
+2. Clean up either the requirements.txt or myproject.toml to use specific versions of packages. 
 
 Bug Fixes:
 
