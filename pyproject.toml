@@ -1,6 +1,6 @@
 [project]
 name="PAIID"
-version = "0.0.1"
+version = "1.0.0"
 authors = [
   { name="Cory Bond", email="cb.cobond@gmail.com" },
 ]
@@ -22,6 +22,8 @@ dependencies  = [
 [project.optional-dependencies]
 test = [
     "pytest",
+    "pytest-env",
+    "pytest-timeout",
     "pytest-qt"
 ]
 
@@ -31,5 +33,12 @@ Homepage = "https://github.com/CoryBond/PAIID"
 
 
 [tool.pytest.ini_options]
-pythonpath = "src"
+pythonpath = [
+  "src",
+  "test"
+]
 qt_api="pyqt5"
+env = [
+    # Fixes qt not working in test environmnet. See : https://stackoverflow.com/questions/68036484/qt-qpa-plugin-could-not-load-the-qt-platform-plugin-xcb-in-even-though-it
+    "QT_QPA_PLATFORM = offscreen"
+]

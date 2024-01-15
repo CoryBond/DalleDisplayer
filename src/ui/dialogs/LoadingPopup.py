@@ -7,7 +7,24 @@ from utils.pathingUtils import get_or_create_image_resources
 
 
 class LoadingPopup(QDialog):
+    """
+    Simple loading popup with an animated image.
 
+    To open and control the animation this Loading popups show/stop functions should be called rather
+    then using the default QDialog show/close methods. Using the custom show/stop methods of this
+    class with a pre-loaded LoadingPopup will help reduce lag when loading the animation image.
+
+    Attributes
+    ----------
+
+    Methods
+    ----------
+    showWithAnimation()
+        Starts the loading animation and unhides the popup
+    
+    stop()
+        Stops the loading animation and hides the popup
+    """
 
     def __init__(self):
         super().__init__()

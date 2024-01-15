@@ -2,6 +2,9 @@ from pathlib import Path
 
 
 def get_project_root() -> Path:
+    """
+    Gets the absolute path of the PAIID project.
+    """
     return Path(__file__).parent.parent
 
 

@@ -34,7 +34,29 @@ QPushButton {
 
 
 class QApplicationManager(object):
+    """
+    Wrapper class which manages a QApplication instance. 
+    
+    For any QT project a QApplication object MUST be created before any other widgets. Additionally for some QT features, like plugins, some programmatic registration and setup
+    is required before an QApplications can be made. This manager handles all of that within its constructor.
 
+    Some settings/features this manager applies at construction time include:
+    1. Dark mode theming
+    2. Setup the QT Virtual Keyboard
+
+    Future versions of this manager can also allow dynamic manipulcation of the QApplication after construction time (for example, switching themes for the entire application.)
+
+    Attributes
+    ----------
+
+    Methods
+    ----------
+    applyStyling()
+        Applies application wide styling. This includes darkmode and styles to make text/widgets bigger for a smaller screen.
+
+    getQApp()
+        Gets the singleton QApplication object
+    """
 
     def __init__(self):
         os.environ["QT_IM_MODULE"] = "qtvirtualkeyboard"
@@ -46,11 +68,11 @@ class QApplicationManager(object):
         return
 
 
-    def applyStyling(self):
+    def applyStyling(self) -> None:
         # final style sheet
         styleSheet = qdarkstyle.load_stylesheet_pyqt5() + customstyling
         self.app.setStyleSheet(styleSheet)
 
 
-    def getQApp(self):
+    def getQApp(self) -> QApplication:
         return self.app

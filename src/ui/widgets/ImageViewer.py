@@ -5,7 +5,24 @@ from PyQt5.QtGui import QPixmap, QTransform
 
 
 class ImageViewer(QGraphicsView):
+    """
+    QT Widget to display a singular and move a singular image.
+    
+    Images can be moved via:
+    1. Panning the image when click/touch drag movements
+    2. Zomming in/out of the image with a pinch (touch) gesture anywhere in the viewer
 
+    Attributes
+    ----------
+
+    Methods
+    ----------
+    replace_image(imagePath)
+        Replaces the current image with a new one from the given path. The new image will "fit" into the views current frame when fully loaded.
+
+    has_photo()
+        Returns if the current view has any image loaded to it currently
+    """
 
     def __init__(self, startingImage: str):
         super().__init__()
@@ -39,7 +56,7 @@ class ImageViewer(QGraphicsView):
 
     
     def has_photo(self):
-        return True
+        return hasattr(self, "pixmapItem")
 
 
     def get_scale_factor(self):
