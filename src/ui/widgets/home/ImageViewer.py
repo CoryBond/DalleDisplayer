@@ -24,7 +24,7 @@ class ImageViewer(QGraphicsView):
         Returns if the current view has any image loaded to it currently
     """
 
-    def __init__(self, startingImage: str):
+    def __init__(self, startingImage: str = None):
         super().__init__()
         self.init_ui(startingImage)
 

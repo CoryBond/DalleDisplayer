@@ -7,6 +7,16 @@ from utils.pathingUtils import get_or_create_image_repos
 from PIL import Image
 
 
+class ImageResult(object):
+    def __init__(self, prompt: str, repo: str, date: str, time: str, num: int, pngPath: Path):
+        self.prompt = prompt
+        self.repo = repo
+        self.date = date
+        self.time = time
+        self.num = num
+        self.pngPath = pngPath
+
+
 class RepoManager(object):
     """
     Class that manages a colleciton of AI image repositories set in a local file system.
@@ -25,11 +35,15 @@ class RepoManager(object):
         return
 
 
+    def current_repo(self):
+        return self.imageRepo.name
+
+
     def switch_repo(self, newRepo: str):
         self.imageRepo = get_or_create_image_repos()/newRepo
 
 
-    def generate_png_path(self, prompt: str) -> Path:
+    def generate_png_path(self, prompt: str) -> ImageResult:
         dateTimeSegments = get_current_sortable_datetime_strs()
         dayDirectory = self.imageRepo/dateTimeSegments[0]
 
@@ -37,10 +51,17 @@ class RepoManager(object):
         promptAbsPath = dayDirectory/promptWithTime
         promptAbsPath.mkdir( parents=True, exist_ok=True )
 
-        return promptAbsPath/"1.png"
+        return ImageResult(
+            prompt,
+            repo=self.current_repo(),
+            date=dateTimeSegments[0],
+            time=dateTimeSegments[1],
+            num="1",
+            pngPath=promptAbsPath/"1.png"
+        )
 
     
-    def get_latest_image_posix_in_repo(self):
+    def get_latest_image_posix_in_repo(self) -> ImageResult:
         try:
             imageDates = os.listdir(self.imageRepo)
             lastImageDate = imageDates[0]
@@ -52,13 +73,22 @@ class RepoManager(object):
             lastImagePromptPosix = (pathToLastImagePrompt/"1.png").as_posix()
 
             logging.info("Found last image prompt of repo : " + lastImagePromptPosix)
-            return lastImagePromptPosix
+
+            time, prompt = lastImagePrompt.split("_")
+            return ImageResult(
+                prompt=prompt,
+                repo=self.current_repo(),
+                date=lastImageDate,
+                time=time,
+                num="1",
+                pngPath=lastImagePromptPosix
+            )
         except BaseException as e:
             logging.warning(e)
             return None
 
 
-    def save_image(self, prompt: str, image: Image) -> Path:
-        pngPath = self.generate_png_path(prompt)
-        image.save(pngPath, "PNG")
-        return pngPath
+    def save_image(self, prompt: str, image: Image) -> ImageResult:
+        result = self.generate_png_path(prompt)
+        image.save(result.pngPath, "PNG")
+        return result

@@ -5,7 +5,16 @@ from speechRecognition.GoogleSpeachRecognizer import GoogleSpeechRecognizer
 from ui.widgets.MainWindow import MainWindow
 from ui.QApplicationManager import QApplicationManager
 from ui.UIOrchestrator import UIOrchestrator
+from ui.widgets.home.HomePage import HomePage
+from ui.widgets.gallery.GalleryPage import GalleryPage
+
 from utils.pathingUtils import get_project_root
+
+from utils.pageUtils import PageDictType, PageName, PageCaption, PageHint, PageMetaDecorator
+
+
+class PagesDispatcher:
+    pages: PageDictType
 
 
 class Container(containers.DeclarativeContainer):
@@ -32,11 +41,16 @@ class Container(containers.DeclarativeContainer):
         imageProvider.provided.engine_name.call(),
     )
 
-    mainWindow = providers.Singleton(
+    home = providers.Factory(HomePage, repoManager, imageProvider, speechRecognizer),
+    gallery = providers.Factory(GalleryPage, repoManager),
+
+    homePageMeta = providers.Factory(PageMetaDecorator, home[0], PageName.HOME, PageCaption.HOME, PageHint.HOME),
+    galleryPageMeta = providers.Factory(PageMetaDecorator, gallery[0], PageName.GALLERY, PageCaption.GALLERY, PageHint.GALLERY),
+
+    mainWindow = providers.Factory(
         MainWindow,
-        imageProvider,
-        repoManager,
-        speechRecognizer
+        homePageMeta[0],
+        galleryPageMeta[0]
     )
 
     uiOrchestrator = providers.Singleton(
