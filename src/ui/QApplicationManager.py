@@ -30,6 +30,11 @@ QWidget {
 QPushButton {
     height: 40px;
 }
+
+QSplitter {
+    width: 25px;
+}
+
 """
 
 
