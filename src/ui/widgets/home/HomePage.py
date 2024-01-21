@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtCore import pyqtSignal, QRunnable, QThreadPool
 
 from imageProviders.ImageProvider import ImageProvider, ImageProviderResult
-from repoManager.RepoManager import RepoManager, ImageResult
+from repoManager.RepoManager import RepoManager, ImagePrompResult
 from ui.dialogs.ErrorMessage import ErrorMessage
 from ui.dialogs.LoadingPopup import LoadingPopup
 
@@ -67,14 +67,14 @@ class HomePage(QSplitter):
         self.createImageSignal.connect(self.create_image_action)
         self.loadImageSignal.connect(self.load_image_response)
 
-        loadResult = self.repoManager.get_latest_image_posix_in_repo()
+        loadResult = self.repoManager.get_latest_images_in_repo()
         self.init_ui(loadResult, speechRecognizer)
 
 
-    def init_ui(self, lastImageResult: ImageResult, speechRecognizer : SpeechRecognizer):
+    def init_ui(self, lastImageResult: ImagePrompResult, speechRecognizer : SpeechRecognizer):
         self.imageGenerator = ImageGenerator(createImageSignal = self.createImageSignal, speechRecognizer = speechRecognizer)
         self.addWidget(self.imageGenerator)
-        self.imageViewer = ImageViewer(lastImageResult.pngPath)
+        self.imageViewer = ImageViewer(lastImageResult.pngPaths[0])
         self.addWidget(self.imageViewer)
         self.imageMeta = ImageMeta(ImageMetaInfo(
                 prompt= lastImageResult.prompt, 
@@ -94,7 +94,7 @@ class HomePage(QSplitter):
             ErrorMessage(response['errorMessage']).exec()
         else:
             saveResult = self.repoManager.save_image(prompt, response['img'])
-            self.imageViewer.replace_image(saveResult.pngPath.as_posix())
+            self.imageViewer.replace_image(saveResult.pngPaths[0].as_posix())
             self.imageMeta.loadMetaSignal.emit(ImageMetaInfo(
                 prompt= prompt, 
                 date= saveResult.date, 

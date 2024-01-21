@@ -20,6 +20,16 @@ def handleVisibleChanged():
                 w.setMask(QRegion(r))
                 return
 
+ghost_white = "#f8f8ff"
+
+# Dark Mode Patching
+darkmodepatchedstyle = """
+QHLine#PAIID_QHLine { 
+    border: 2px solid #f8f8ff;
+}
+
+"""
+
 
 # Custom styling 
 customstyling = """
@@ -34,6 +44,10 @@ QPushButton {
 QSplitter {
     width: 25px;
 }
+
+QScrollBar:vertical {
+    width: 25px;
+ } 
 
 """
 
@@ -75,7 +89,7 @@ class QApplicationManager(object):
 
     def applyStyling(self) -> None:
         # final style sheet
-        styleSheet = qdarkstyle.load_stylesheet_pyqt5() + customstyling
+        styleSheet = qdarkstyle.load_stylesheet_pyqt5() + darkmodepatchedstyle + customstyling
         self.app.setStyleSheet(styleSheet)
 
 

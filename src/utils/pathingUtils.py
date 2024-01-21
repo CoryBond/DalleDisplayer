@@ -1,4 +1,6 @@
 from pathlib import Path
+import os
+from typing import List
 
 
 def get_project_root() -> Path:
@@ -25,3 +27,15 @@ def get_or_create_image_resources() -> Path:
     image_resources_path.mkdir( parents=True, exist_ok=True )
     return image_resources_path
     
+
+def get_sorted_directory_by_name(directory: Path) -> List[str]:
+    """
+    Not as efficient as getting directory by created time
+    """
+    def get_name(entry):
+        return entry.name
+
+    with os.scandir(directory) as entries:
+        sorted_entries = sorted(entries, key=get_name, reverse=True)
+        sorted_items = [get_name(entry) for entry in sorted_entries]
+    return sorted_items

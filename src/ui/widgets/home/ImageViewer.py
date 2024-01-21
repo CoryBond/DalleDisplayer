@@ -2,6 +2,7 @@ import logging
 from PyQt5.QtWidgets import QSplashScreen, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QPinchGesture, QGraphicsItem, QGestureEvent
 from PyQt5.QtCore import QRectF, QEvent, Qt
 from PyQt5.QtGui import QPixmap, QTransform
+from pathlib import Path
 
 
 class ImageViewer(QGraphicsView):
@@ -24,12 +25,12 @@ class ImageViewer(QGraphicsView):
         Returns if the current view has any image loaded to it currently
     """
 
-    def __init__(self, startingImage: str = None):
+    def __init__(self, startingImage: Path = None):
         super().__init__()
         self.init_ui(startingImage)
 
 
-    def init_ui(self, startingImage: str):
+    def init_ui(self, startingImage: Path):
 
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.grabGesture(Qt.PinchGesture)
@@ -39,11 +40,12 @@ class ImageViewer(QGraphicsView):
             self.replace_image(startingImage)
         
     
-    def replace_image(self, imagePath: str):
+    def replace_image(self, imagePath: Path):
         scene = QGraphicsScene(self)
 
         # Add an image to the scene
-        pixmap = QPixmap(imagePath)  # Replace with the path to your image
+        print(imagePath.as_posix())
+        pixmap = QPixmap(imagePath.as_posix())
         splash = QSplashScreen(pixmap)
         splash.show()
         self.pixmapItem = QGraphicsPixmapItem(pixmap)
