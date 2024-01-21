@@ -7,7 +7,7 @@ from utils.qtUtils import clear_layout
 
 
 class ImageMetaInfo(object):
-    def __init__(self, prompt: str, engine: str, date: str, time: str, num: int):
+    def __init__(self, prompt: str, engine: str, date: str, time: str, num: str):
         self.prompt = prompt
         self.engine = engine
         self.date = date

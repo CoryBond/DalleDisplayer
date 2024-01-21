@@ -1,6 +1,5 @@
 from io import BytesIO
 import logging
-from typing import cast
 import openai
 import requests
 from imageProviders.ImageProvider import ImageProvider, ImageProviderResult

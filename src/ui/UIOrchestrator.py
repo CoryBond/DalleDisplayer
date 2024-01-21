@@ -2,9 +2,15 @@
 import logging
 import sys
 
+from PyQt5.QtGui import QImage
+
 from ui.widgets.MainWindow import MainWindow
 from ui.QApplicationManager import QApplicationManager
+from ui.widgets.gallery.GalleryPage import GalleryPage
+from ui.widgets.home.HomePage import HomePage
+from ui.widgets.home.ImageMeta import ImageMetaInfo
 
+from PIL import ImageQt
 
 class QtBot():
     """
@@ -34,9 +40,22 @@ class UIOrchestrator():
         Does not close the python interpreter.
     """
 
-    def __init__(self, qApplicationManager: QApplicationManager, mainWindow: MainWindow):
+    def __init__(self, qApplicationManager: QApplicationManager, homePage: HomePage, galleryPage: GalleryPage, mainWindow: MainWindow):
         self.app = qApplicationManager.getQApp()
+        self.homePage = homePage
+        self.galleryPage = galleryPage
         self.mainWindow = mainWindow
+
+        # Connect gallery actions to home page
+        def loadImageToMainPage(metaInfo: ImageMetaInfo, image: QImage):
+            print("click3")
+            print(metaInfo)
+            print(image)
+            self.homePage.loadImageSignal.emit(metaInfo, image)
+            self.mainWindow.route_to_page(self.homePage)
+
+        galleryPage.imageClickedSignal.connect(loadImageToMainPage)
+
         return
 
 

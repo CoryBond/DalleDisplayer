@@ -1,9 +1,9 @@
-import json
 from typing import Callable
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QStackedWidget, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton
 from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QImage
 
-from utils.qtUtils import clear_layout
+from ui.widgets.home.ImageMeta import ImageMetaInfo
 
 from repoManager.RepoManager import DIRECTION, RepoManager
 from ui.widgets.gallery.GalleryDisplay import GalleryDisplay
@@ -55,6 +55,7 @@ class GalleryPage(QWidget):
     has_photo()
         Returns if the current view has any image loaded to it currently
     """
+    imageClickedSignal = pyqtSignal(ImageMetaInfo, QImage)
 
     def __init__(self, repoManager: RepoManager):
         super().__init__()
@@ -67,6 +68,9 @@ class GalleryPage(QWidget):
         self.rightBookmarkPageToken = None
 
         self.init_ui()
+
+        # pass through emit from child to this parent
+        self.gallery.imageClickedSignal.connect(self.imageClickedSignal.emit)
 
 
     def init_ui(self):

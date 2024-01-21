@@ -2,18 +2,17 @@
 from pathlib import Path
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QScrollArea
 from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QImage
 
 from typing import List
 
 from repoManager.RepoManager import ImagePrompResult
 from ui.widgets.common.QLine import QHLine
-from utils.qtUtils import clear_layout
+from ui.widgets.home.ImageMeta import ImageMetaInfo
 
 
 class ImagesDisplay(QWidget):
-
-    imageClicked = pyqtSignal([str])  # Signal emited when image is clicked
+    imageClickedSignal =  pyqtSignal(ImageMetaInfo, QImage)
 
     def __init__(self, image: ImagePrompResult):
         super().__init__()
@@ -30,7 +29,7 @@ class ImagesDisplay(QWidget):
 
         layout.addWidget(QHLine())
 
-        layout.addWidget(self.create_image(image.pngPaths[0]))
+        layout.addWidget(self.create_image(image, image.pngPaths[0]))
 
         self.setLayout(layout)
 
@@ -53,15 +52,26 @@ class ImagesDisplay(QWidget):
         return headerLayout
     
 
-    def create_image(self, imgPath: Path) -> QLabel:
+    def create_image(self, image: ImagePrompResult, imgPath: Path) -> QLabel:
         pixmap = QPixmap(imgPath.as_posix())
         label = QLabel()
         label.resize(75, 75)
         label.setPixmap(pixmap.scaled(label.size(), Qt.IgnoreAspectRatio))
+        def leftClickEvent(event):
+            if event.button() == Qt.LeftButton:
+                print("click")
+                self.imageClickedSignal.emit(
+                    ImageMetaInfo(
+                        prompt=image.prompt, date=image.date, time=image.time, engine=image.repo, num="1"
+                    ), 
+                    pixmap.toImage()
+                )
+        label.mousePressEvent = leftClickEvent
         return label
 
 
 class GalleryDisplay(QScrollArea):
+    imageClickedSignal = pyqtSignal(ImageMetaInfo, QImage)
 
 
     def __init__(self, images: List[ImagePrompResult] = []):
@@ -85,7 +95,9 @@ class GalleryDisplay(QScrollArea):
         layout = QVBoxLayout()
 
         for image in images:
-            layout.addWidget(ImagesDisplay(image))
+            imageDisplay = ImagesDisplay(image)
+            imageDisplay.imageClickedSignal.connect(self.imageClickedSignal.emit)
+            layout.addWidget(imageDisplay)
 
         childWidget = QWidget()
         childWidget.setLayout(layout)

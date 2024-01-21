@@ -1,4 +1,3 @@
-import logging
 from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtCore import pyqtSignal, QRunnable, QThreadPool
 
@@ -33,7 +32,8 @@ def background_create_image_process(imageProvider: ImageProvider, prompt: str, l
 
 class HomePage(QSplitter):
     createImageSignal = pyqtSignal(str)
-    loadImageSignal = pyqtSignal(str, object)
+    loadNewImageSignal = pyqtSignal(str, object)
+    loadImageSignal = pyqtSignal(ImageMetaInfo, object)
 
     """
     QT Widget to display a singular and move a singular image.
@@ -65,6 +65,7 @@ class HomePage(QSplitter):
         self.loadingScreen = LoadingPopup()
 
         self.createImageSignal.connect(self.create_image_action)
+        self.loadNewImageSignal.connect(self.load_new_image_response)
         self.loadImageSignal.connect(self.load_image_response)
 
         loadResult = self.repoManager.get_latest_images_in_repo()
@@ -87,7 +88,7 @@ class HomePage(QSplitter):
         self.setSizes([200, 800, 0])
 
 
-    def load_image_response(self, prompt: str, response: ImageProviderResult):        
+    def load_new_image_response(self, prompt: str, response: ImageProviderResult):        
         if response['errorMessage'] != None:
             # Remove loading Screen so it doesn't overlap the error message
             self.loadingScreen.stop()
@@ -96,15 +97,20 @@ class HomePage(QSplitter):
             saveResult = self.repoManager.save_image(prompt, response['img'])
             self.imageViewer.replace_image(saveResult.pngPaths[0].as_posix())
             self.imageMeta.loadMetaSignal.emit(ImageMetaInfo(
-                prompt= prompt, 
-                date= saveResult.date, 
-                time= saveResult.time, 
+                prompt= prompt,
+                date= saveResult.date,
+                time= saveResult.time,
                 engine= saveResult.repo,
                 num= saveResult.num
             ))
 
         self.loadingScreen.stop()
         self.imageGenerator.toggle_disabled_prompting(False)
+
+
+    def load_image_response(self, metaInfo: ImageMetaInfo, image):        
+        self.imageViewer.replace_image(image)
+        self.imageMeta.loadMetaSignal.emit(metaInfo)
 
 
     def create_image_action(self, prompt: str):
