@@ -3,6 +3,8 @@ from typing import TypedDict
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QFormLayout, QGroupBox, QLabel
 from PyQt5.QtCore import pyqtSignal
 
+from utils.qtUtils import clear_layout
+
 
 class ImageMetaInfo(object):
     def __init__(self, prompt: str, engine: str, date: str, time: str, num: int):
@@ -58,7 +60,7 @@ class ImageMeta(QWidget):
 
     def replace_meta(self, metaInfo: ImageMetaInfo):
         # clear the existing layout
-        self.clear_layout()
+        clear_layout(layout=self.layout())
 
         print("metaInfo")
         print(str(metaInfo))
@@ -77,25 +79,6 @@ class ImageMeta(QWidget):
 
         metaLayout.addLayout(metaDetailLayout)
 
-        # imageLayout = QHBoxLayout()
-        # imageLayout.addWidget(QLabel("1"))
-        # imageLayout.addWidget(QLabel("2"))
-
-        # metaLayout.addLayout(imageLayout)
-
         metaGroup.setLayout(metaLayout)
         self.layout().addWidget(metaGroup)
-
-    
-    def clear_layout(self):
-        # Get the current layout
-        current_layout = self.layout()
-
-        # Remove the current layout from the widget
-        if current_layout:
-            while current_layout.count():
-                item = current_layout.takeAt(0)
-                widget = item.widget()
-                if widget:
-                    widget.setParent(None)
         
