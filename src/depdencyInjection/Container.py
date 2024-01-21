@@ -41,13 +41,13 @@ class Container(containers.DeclarativeContainer):
         imageProvider.provided.engine_name.call(),
     )
 
-    home = providers.Factory(HomePage, repoManager, imageProvider, speechRecognizer),
-    gallery = providers.Factory(GalleryPage, repoManager),
+    home = providers.Singleton(HomePage, repoManager, imageProvider, speechRecognizer),
+    gallery = providers.Singleton(GalleryPage, repoManager),
 
-    homePageMeta = providers.Factory(PageMetaDecorator, home[0], PageName.HOME, PageCaption.HOME, PageHint.HOME),
-    galleryPageMeta = providers.Factory(PageMetaDecorator, gallery[0], PageName.GALLERY, PageCaption.GALLERY, PageHint.GALLERY),
+    homePageMeta = providers.Singleton(PageMetaDecorator, home[0], PageName.HOME, PageCaption.HOME, PageHint.HOME),
+    galleryPageMeta = providers.Singleton(PageMetaDecorator, gallery[0], PageName.GALLERY, PageCaption.GALLERY, PageHint.GALLERY),
 
-    mainWindow = providers.Factory(
+    mainWindow = providers.Singleton(
         MainWindow,
         homePageMeta[0],
         galleryPageMeta[0]
@@ -56,5 +56,7 @@ class Container(containers.DeclarativeContainer):
     uiOrchestrator = providers.Singleton(
         UIOrchestrator,
         qApplicationManager,
+        home[0],
+        gallery[0],
         mainWindow
     )

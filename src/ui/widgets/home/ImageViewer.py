@@ -1,4 +1,3 @@
-import logging
 from PyQt5.QtWidgets import QSplashScreen, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QPinchGesture, QGraphicsItem, QGestureEvent
 from PyQt5.QtCore import QRectF, QEvent, Qt
 from PyQt5.QtGui import QPixmap, QTransform
@@ -37,16 +36,15 @@ class ImageViewer(QGraphicsView):
 
         # Create a graphics view and scene
         if startingImage is not None:
-            self.replace_image(startingImage)
+            self.replace_image(startingImage.as_posix())
         
     
-    def replace_image(self, imagePath: Path):
+    def replace_image(self, image):
         scene = QGraphicsScene(self)
 
         # Add an image to the scene
-        print(imagePath.as_posix())
-        pixmap = QPixmap(imagePath.as_posix())
-        splash = QSplashScreen(pixmap)
+        pixmap = QPixmap(image)
+        splash = QSplashScreen(pixmap) 
         splash.show()
         self.pixmapItem = QGraphicsPixmapItem(pixmap)
         self.pixmapItem.setFlag(QGraphicsItem.ItemIsMovable)

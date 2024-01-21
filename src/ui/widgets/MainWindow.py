@@ -1,9 +1,4 @@
-import logging
-from PyQt5.QtWidgets import QMainWindow, QStackedWidget, QWidget, QToolBar, QAction
-from PyQt5.QtCore import pyqtSignal
-
-from imageProviders.ImageProvider import ImageProviderResult
-from ui.dialogs.LoadingPopup import LoadingPopup
+from PyQt5.QtWidgets import QMainWindow, QStackedWidget, QToolBar, QAction
 
 from utils.pageUtils import PageMetaDecorator
 
