@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List
 
 
-def get_current_sortable_datetime_strs() -> List[str]:
+def generate_ios_date_time_strs() -> List[str]:
     """
     Gets the current date and time in ISO format. 
     Will be seperated in a tuple where date is the first index and time is the second index.

@@ -1,73 +1,94 @@
-from enum import Enum
 import logging
+import traceback
 import os
 from pathlib import Path
-from typing import List
-from decorators.decorators import auto_str
+from typing import Union, List
+from repoManager.DirectoryIterator import DirectoryIterator
+from repoManager.Models import ImagePrompResult, NextToken, ImagePromptDirectory, GetImagePrompsResult
 
-from utils.dateUtils import get_current_sortable_datetime_strs
-from utils.pathingUtils import get_or_create_image_repos, get_sorted_directory_by_name
+from repoManager.utils import generate_file_name
+from utils.dateUtils import generate_ios_date_time_strs
 from PIL import Image
 
-
-@auto_str
-class ImagePromptDirectory(object):
-    def __init__(self, prompt: str, repo: str, date: str, time: str, absPath: str = None):
-        self.prompt = prompt
-        self.repo = repo
-        self.date = date
-        self.time = time
-        self.absolutePath = absPath
+from utils.pathingUtils import DIRECTION
 
 
-@auto_str 
-class NextToken(object):
-    def __init__(self, prompt: str, repo: str, date: str, time: str):
-        self.prompt = prompt
-        self.repo = repo
-        self.date = date
-        self.time = time
+def generate_nextToken(directoryToTokenize: ImagePromptDirectory):
+    """
+    Takes an image prompt directory and generates a token for it. Tokens are uesd in pagination systems
+    to bookmark what page a client was last at when getting items.
+
+    For the repo manager a token is basically just a image prompt directory. This doesn't have to be the
+    case though. In fact for clients, the actual implementation of the token shouldn't be important for
+    most interactions with the repo manager. The only thing the client has to do is provide previous nexttokens
+    in order to get the next page of imageprompt directories from the system.
+
+    Parameters
+    ----------
+    directoryToTokenize (ImagePromptDirectory): 
+        Model of a image prompt directory that will be tokenized
+
+    Returns
+    -------
+    NextToken
+        The nexttoken used for pagination and bookmarking.
+
+    """
+    nextToken = None
+    if(directoryToTokenize is not None):
+        nextToken = NextToken(
+            prompt=directoryToTokenize.prompt,
+            repo=directoryToTokenize.repo,
+            date=directoryToTokenize.date,
+            time=directoryToTokenize.time
+        )
+    return nextToken
 
 
-@auto_str
-class ImagePrompResult(object):
-    def __init__(self, prompt: str, repo: str, date: str, time: str, num: int, pngPaths: List[Path]):
-        self.prompt = prompt
-        self.repo = repo
-        self.date = date
-        self.time = time
-        self.num = num
-        self.pngPaths = pngPaths
+def generate_image_prompt_path(directory: ImagePromptDirectory) -> Path:
+    """
+    Converts a directory model into a file system path
 
+    Parameters
+    ----------
+    directory (ImagePromptDirectory): 
+        Model representing the directory within the image repo.
 
-@auto_str
-class GetImagePrompsResult(object):
-    def __init__(self, results: List[ImagePrompResult], nextToken: NextToken):
-        self.results = results
-        self.nextToken = nextToken
-
-
-class DIRECTION(Enum):
-    FORWARD = "forward"
-    BACKWARD = "backward"
+    Returns
+    -------
+    Path
+        Path representing the file system location the image prompt directory modelled.
+        Can be used to do filesystem operations on the directory.
+    
+    """
+    return Path(directory.repo)/directory.date/generate_file_name(directory.time, directory.prompt)
 
 
 class RepoManager(object):
     """
     Class that manages a colleciton of AI image repositories set in a local file system.
 
-    AI Image repos are saved by directory under "$HOME/PAIID/resources/imageRepos". Within each repo images
+    AI Image repos are saved per repo under the provided reposPath arg. Within each repo, images
     are partitioned by date first. Per date the images are saved together under the prompt and time they were generated.
-    So, for example, if we have a prompt "Sad rat" generate 2 images then they can be saved under the following path:
-    "$HOME/PAIID/resources/imageRepos/Dall-e/2024-01-11/15:05:06.713451_Sad rat"
+    So, for example, if we have a prompt "Sad rat" which generated 2 images then they can be potentially saved under the path
+    "$reposPath/Dall-e/2024-01-11/15:05:06.713451_Sad rat" as "1.png" and "2.png"
 
-    When saving with this repo manager the entire path will be created and images will be stored there. Currently this
-    repo manager does not allow configuring where imageRepos are managed.
+    The repo manager will attempt to make a folder of the provided reposPath if it doesn't already exist. If the Repo Manager
+    cannot make the provided reposPath for any reason it will throw an exception.
+
+    Accessing images supports pagination.
+
+    NOTE: Currently the "images" returned by this repo manager are actually paths to the image on the file system. Clients are expected to
+    access the file system if they want to actually get the images. This was a early design that simplified the implementation without
+    having to fluff with byte conversions in testing. The repo manager and its clients were never expected to be used outside the same 
+    filesystem. A better, less coupled design would have the Repo Manager return the actual images themselves (as bytes). Maybe a 
+    design improvement for future iterations.    
     """
 
-    def __init__(self, startingRepo: str):
+    def __init__(self, reposPath: Union[str, Path], startingRepo: str):
+        self.reposPath = Path(reposPath)
+        os.makedirs(self.reposPath, exist_ok=True)
         self.switch_repo(startingRepo)
-        return
 
 
     def current_repo(self):
@@ -75,229 +96,261 @@ class RepoManager(object):
 
 
     def switch_repo(self, newRepo: str):
-        self.imageRepo: Path = get_or_create_image_repos()/newRepo
+        """
+        Changes the repo folder for the manager. 
+        Older tokens for the previous repo should be discarded if repos change.
+
+        Parameters
+        ----------
+        newRepo (str): 
+            The new repo folder the repo manager will use for all operations.
+            The repo manager will not create a directory on the file system for this repo until the repo manager needs
+            to save something to it.
+        """
+        self.imageRepo: Path = self.reposPath/newRepo
+        os.makedirs(self.imageRepo, exist_ok=True)
 
 
-    def generate_file_name(self, time: str, prompt: str):
-        return time + "_" + prompt
+    def generate_image_prompt_directory(self, prompt: str) -> [ImagePromptDirectory, str]:
+        """
+        Take the given prompt and generate a date/time-prompt entry within the given repo directory.
+        Will use the current date and time this method was called to generate the directory.
 
+        Will atempt to create the entries absolute path of the entry if fs permissions allow it. This 
+        should be safe as RepoManager will error out 
 
-    def generate_png_path(self, prompt: str) -> ImagePromptDirectory:
-        date, time = get_current_sortable_datetime_strs()
+        Parameters
+        ----------
+        prompt (str): 
+            the prompt to generate an repo entry for
+
+        Returns
+        -------
+        ImagePromptDirectory
+            A model representing the newly generate image prompt directory.
+        
+        """
+        date, time = generate_ios_date_time_strs()
         dayDirectory = self.imageRepo/date
 
-        promptWithTime = self.generate_file_name(time, prompt)
+        promptWithTime = generate_file_name(time, prompt)
         promptAbsPath = dayDirectory/promptWithTime
         promptAbsPath.mkdir( parents=True, exist_ok=True )
 
-        return ImagePromptDirectory(
-            prompt,
-            repo=self.current_repo(),
-            date=date,
-            time=time,
-            absPath=promptAbsPath
-        )
+        return [
+            ImagePromptDirectory(
+                prompt,
+                repo=self.current_repo(),
+                date=date,
+                time=time
+            ), 
+            promptAbsPath
+        ]
 
-    
-    def get_files(self, date: str, folderName: str) -> ImagePrompResult:
-        logging.info(f"Attempting to load images from {date} and folder {folderName}")
-        time, prompt = folderName.split("_")
-        pathToLastImagePrompt = self.imageRepo/date/folderName
-        fullImagePaths = [pathToLastImagePrompt/file for file in os.listdir(pathToLastImagePrompt)]
 
+    def _get_files(self, directory: ImagePromptDirectory) -> ImagePrompResult:
+        logging.info(f"Attempting to load images from path {self.reposPath} and directory {directory}")
+        directorySubPath = generate_image_prompt_path(directory)
+        fullPathToImagePromptFolder = self.reposPath/directorySubPath
+
+        fullImagePaths = [fullPathToImagePromptFolder/img_file for img_file in os.listdir(fullPathToImagePromptFolder)]
+
+        logging.info(f"Found {len(fullImagePaths)} images")
         logging.debug(f"Found the images : {str(fullImagePaths)}")
         return ImagePrompResult(
-            prompt=prompt,
-            repo=self.current_repo(),
-            date=date,
-            time=time,
+            prompt=directory.prompt,
+            repo=directory.repo,
+            date=directory.date,
+            time=directory.time,
             num="1",
             pngPaths=fullImagePaths
         )
 
 
     def get_latest_images_in_repo(self) -> ImagePrompResult:
+        """
+        Gets the very first prompt_time images from the repo if possible.
+        Unlike other paginated access functions this method will return None
+        at any point there is a exception.
+
+        Returns
+        -------
+        ImagePrompResult
+            A API result containing the images and other meta data of the images.
+        
+        """
         logging.info("Attempting to load last image created")
         try:
-            imageDates = get_sorted_directory_by_name(self.imageRepo)
-            lastImageDate = imageDates[0]
-            lastDateImagePrompts = get_sorted_directory_by_name(self.imageRepo/lastImageDate)
-            lastImagePrompt = lastDateImagePrompts[0]
-
-            return self.get_files(date=lastImageDate, folderName=lastImagePrompt)
-        except BaseException as e:
-            logging.warning(e)
+            return self.get_init_images(number = 1).results[0]
+        except:
             return None
-
-
-    def get_next_image_folder(self, currentDirectory: ImagePromptDirectory, currentTimePromptDirectories: List[str], sortedDatesDirectory: List[str], direction: DIRECTION = DIRECTION.FORWARD) -> tuple[ImagePromptDirectory, : List[str]]:
-        promptWithTime = self.generate_file_name(currentDirectory.time, currentDirectory.prompt)
-
-        def index_not_out_of_bounds(index: int, directory: List[str]):
-            return direction is DIRECTION.FORWARD and index < len(currentTimePromptDirectories) or direction is DIRECTION.BACKWARD and index >= 0
-        
-        # To support going forward or backward
-        nextIndex = 1 if direction is not DIRECTION.BACKWARD else -1
-
-        nextImageIndex = currentTimePromptDirectories.index(promptWithTime) + nextIndex
-        currentImageTime = currentDirectory.time
-        currentPrompt = currentDirectory.prompt
-        currentImageDate = currentDirectory.date
-        if(index_not_out_of_bounds(nextImageIndex, currentTimePromptDirectories)):
-            currentImageFolder = currentTimePromptDirectories[nextImageIndex]
-            currentImageTime, currentPrompt = currentImageFolder.split("_")
-        else:
-            # go to the next date as this directory is exhausted
-            nextDateIndex = sortedDatesDirectory.index(currentImageDate) + nextIndex
-            if(index_not_out_of_bounds(nextDateIndex, sortedDatesDirectory)):
-                currentImageDate = sortedDatesDirectory[nextDateIndex]
-                currentTimePromptDirectories = get_sorted_directory_by_name(self.imageRepo/currentImageDate)
-                startIndexOfNextDateFolder = 0 if direction is not DIRECTION.BACKWARD else len(currentTimePromptDirectories)-1
-                currentImageTime, currentPrompt = currentTimePromptDirectories[startIndexOfNextDateFolder].split("_")
-            else:
-                # We have exhausted all directories! No Directory can be returned
-                return [None, currentTimePromptDirectories]
-        return [
-            ImagePromptDirectory(
-                prompt=currentPrompt,
-                repo=self.current_repo(),
-                date=currentImageDate,
-                time=currentImageTime
-            ), 
-            currentTimePromptDirectories
-        ]
 
 
     def get_init_images(self, number: int) -> GetImagePrompsResult:
-        result = self.get_latest_images_in_repo()
-        firstDirectory = ImagePromptDirectory(
-            prompt=result.prompt,
-            repo=self.imageRepo,
-            date=result.date,
-            time=result.time
-        )
+        """
+        This method is used to "hop into" the pagination system for clients who lack any starting tokens.
 
-        return self._get_images(number, firstDirectory, direction=DIRECTION.FORWARD, forceIncludeCurrentDirectoryInResults=True)
+        In the pagination system, absent tokens represent the exhuastion of results and tokenless pagination
+        requests are invalid. This method allows clients to get results and an initial token so they continue
+        pagination.
+
+        NOTE: The more I think about it a get_init_images "hop in" method makes less and less sense. The purpose
+        of invalidating absent tokens was a safety percaution on the repo managers side in case the caller
+        made the mistake of not providing a token. It also provided a way to implement "go to beginning page"....
+        But I think in most token based pagination systems an absent token... represents basically what 
+        get_init_images is trying to do here. It gets you the first page. So why not just do that and if the caller
+        makes a mistake... then they made a mistake!
+
+        Parameters
+        ----------
+        number (int): 
+            The number of prompts to get images from to get. It does NOT represent how many images to get
+
+        Returns
+        -------
+        GetImagePrompsResult
+            A model representing the results of prompts, their images, or optionally error messages.
+            Also contains a nextToken if getting images is not exhuasted.
+            Results are sorted by most recent date then most recent time. 
+
+        """
+        try:
+            return self._get_images(number, startingDirectory=None, forceIncludeCurrentDirectoryInResults=True)
+        except BaseException as e:
+            logging.error(traceback.format_exc())
+            return GetImagePrompsResult(
+                results=[],
+                errorMessage = f'Critical error retrieving any results : {str(e)}',
+            )
 
 
     def get_images(self, number: int, token: NextToken, direction: DIRECTION = DIRECTION.FORWARD) -> GetImagePrompsResult:
-        validToken = None
-        if token is not None:
-            logging.debug(f"Provided token : {token}")
-            validToken = token
-            return self._get_images(number, validToken, direction)
-        else:
-            logging.warn(f"No images will be returned due to invalid token {token}")
-            return None
+        """
+        Pagination call to get prompts and their images from the repo. Results will be returned in order by the most recent date 
+        and time.
+        
+        If there are less items avaialble then requested then those entries will be returned in full instead of the requested number.
+        The results returned will contain the prompts, their metadata and all existing images created by the prompt. 
 
+        Any intenal exceptions will be caught and returned as a response with whatever results were collected up to that point if
+        possible.
 
-    def _get_images(self, number: int, currentDirectory: ImagePromptDirectory, direction: DIRECTION = DIRECTION.FORWARD, forceIncludeCurrentDirectoryInResults: bool = False) -> GetImagePrompsResult:
+        Pagination is supported via a token system. A token represents a bookmark which, when provided in subsequent calls,
+        will then return results starting from the bookmark. Implementation-wise the token is:
+        1. None if no more entries could of been retrieved
+        2. For forward requests the last entry from the page
+        3. For backwards requests the FIRST entry from the next page (if possible)
+        This design allows for a sliding window approach to pagination where clients can store a "left" and a "right" token
+        which they can use to go back or forward across pages.
+        Tokens do not have to represent a real prompt entry in the file system (in scenarios where the entry was deleted after the
+        token was generated) and if provided these tokens will still get the next logical pages worth of resutls as though the token
+        did represent a physical entry.
+
+        Parameters
+        ----------
+        number (int):
+            The number of prompts to get images from to get. It does NOT represent how many images to get.
+
+        token: (NextToken):
+            An optional token that bookmarks and gets results starting from that bookmark point
+
+        direction: (DIRECTION):
+            The direciton to get page results from. Supports "forward" or "backward". Default is to go forward.
+
+        Returns
+        -------
+        GetImagePrompsResult
+            A model representing the results of prompts, their images, or optionally error messages.
+            Also contains a nextToken if getting images is not exhuasted.
+            Results are sorted by most recent date then most recent time. 
+
+        """
+        try:
+            if token is not None:
+                logging.debug(f"Provided token : {token}")
+                return self._get_images(number, startingDirectory=token, direction=direction)
+            else:
+                logging.warn(f"No images will be returned due to invalid token {token}")
+                return None
+        except BaseException as e:
+            logging.error(traceback.format_exc())
+            return GetImagePrompsResult(
+                results=[],
+                errorMessage = f'Critical error retrieving any results : {str(e)}',
+            )
+
+    def _get_images(self, number: int, startingDirectory: ImagePromptDirectory = None, direction: DIRECTION = DIRECTION.FORWARD, forceIncludeCurrentDirectoryInResults: bool = False) -> GetImagePrompsResult:
         logging.info("Getting images")
+        if(number < 1):
+            return GetImagePrompsResult(results=[], errorMessage="Number must be greater then 0")
 
+        directoryIterator = DirectoryIterator(pathToDirectories=self.imageRepo, startingDirectory=startingDirectory, direction=direction)
         imagePromptResults: List[ImagePrompResult] = []
+        errorMessage = None
 
-        sortedDatesDirectory = get_sorted_directory_by_name(self.imageRepo)
-        currentTimePromptDirectories = get_sorted_directory_by_name(self.imageRepo/currentDirectory.date)
-
-        def generate_nextToken(imagePromptResults: list[ImagePrompResult]):
-            nextToken = None
-            if (len(imagePromptResults) == number):
-                directoryToTokenize = imagePromptResults[-1] if direction is not DIRECTION.BACKWARD else self.get_next_image_folder(imagePromptResults[-1], currentTimePromptDirectories, sortedDatesDirectory, direction)[0]
-                if(directoryToTokenize is not None):
-                    nextToken = NextToken(
-                        prompt=directoryToTokenize.prompt,
-                        repo=self.imageRepo,
-                        date=directoryToTokenize.date,
-                        time=directoryToTokenize.time
-                    )
-            return nextToken
-
-        for num in range(0, number):
-            try:
-                promptWithTime = self.generate_file_name(currentDirectory.time, currentDirectory.prompt)
-
-                logging.debug(f"Getting files for {currentDirectory.date} and {promptWithTime}")
-
-                # if going backwards the token provided will be within the next page. As such include it. There are also scenarios (first initialization) where a caller needs to force include a forward direciton call too
-                if(num == 0 and (direction is DIRECTION.BACKWARD or forceIncludeCurrentDirectoryInResults)):
-                    nextImageFolder = currentDirectory
+        try:
+            if(forceIncludeCurrentDirectoryInResults or direction is DIRECTION.BACKWARD):
+                firstDirectory = directoryIterator.get_current_image_prompt_directory()
+                if(firstDirectory is not None):
                     logging.debug(f"Including current directory in results")
-                else:
-                    nextImageFolder, currentTimePromptDirectories = self.get_next_image_folder(currentDirectory, currentTimePromptDirectories, sortedDatesDirectory, direction)
+                    imagePromptResults.append(self._get_files(directory=firstDirectory))
 
-                if(nextImageFolder is not None):
-                    promptWithTime = self.generate_file_name(nextImageFolder.time, nextImageFolder.prompt)
-                    imagePromptResults.append(self.get_files(date=nextImageFolder.date, folderName=promptWithTime))
-                    currentDirectory = nextImageFolder
+            # Iterate prompt directories until either we found enough prompt directories to match the number requested or until there are none left in the direction we are iterating
+            for _ in range(len(imagePromptResults), number):
+                # if going backwards the token provided will be within the next page. As such include it. There are also scenarios (first initialization) where a caller needs to force include a forward direciton call too
+                nextTimeWithPromptDirectory = directoryIterator.get_next_time_prompt_directories(direction)
+
+                # if 
+                if(nextTimeWithPromptDirectory is not None):
+                    imagePromptResults.append(self._get_files(directory=nextTimeWithPromptDirectory))
                 else:
                     break
-            except BaseException as e:
-                logging.warning(e)
-                break
 
-        resultNextToken = generate_nextToken(imagePromptResults)
+        except BaseException as e:
+            logging.error(traceback.format_exc())
+            errorMessage = f'Critical error while retrieving results : {str(e)}'
+        finally:
+            nextToken = None
+            # Order the page worth of data as though the direction was forward rather then backward
+            if direction is DIRECTION.BACKWARD:
+                imagePromptResults.reverse()
+                nextToken= generate_nextToken(directoryIterator.get_next_time_prompt_directories(direction))
+            else:
+                nextToken = generate_nextToken(directoryIterator.get_current_image_prompt_directory())
 
-        # Order the page worth of data as though the direction was forward rather then backward
-        if direction is DIRECTION.BACKWARD:
-            imagePromptResults.reverse()
-
-        return GetImagePrompsResult(
-            imagePromptResults, 
-            resultNextToken
-        )
-
-
-    def get_images_background(self, number: int, token: NextToken, includeCurrentDirectoryInResults: bool = False) -> GetImagePrompsResult:
-        logging.info("Getting backwards images")
-        currentPrompt = token.prompt
-        currentImageDate = token.date
-        currentImageTime = token.time
-
-        imagePromptResults: List[ImagePrompResult] = []
-
-        sortedDatesDirectory = get_sorted_directory_by_name(self.imageRepo)
-        currentTimePromptDirectories = get_sorted_directory_by_name(self.imageRepo/currentImageDate)
-
-        for num in range(0, number):
-            try:
-                promptWithTime = self.generate_file_name(currentImageTime, currentPrompt)
-
-                imagePromptResults.append(self.get_files(date=currentImageDate, prompt_time=promptWithTime))
-
-                nextImageIndex = currentTimePromptDirectories.index(promptWithTime) - 1
-                if(nextImageIndex >= 0):
-                    currentImageFolder = currentTimePromptDirectories[nextImageIndex]
-                    currentImageTime, currentPrompt = currentImageFolder.split("_")
-                else:
-                    # go to the next date as this directory is exhausted
-                    nextDateIndex = sortedDatesDirectory.index(currentImageDate) - 1
-                    currentImageDate = sortedDatesDirectory[nextDateIndex]
-                    currentTimePromptDirectories = get_sorted_directory_by_name(self.imageRepo/currentImageDate)
-                    currentImageTime, currentPrompt = currentTimePromptDirectories[0].split("_")
-
-            except BaseException as e:
-                logging.warning(e)
-                break
-
-        return GetImagePrompsResult(
-            imagePromptResults, 
-            NextToken(
-                prompt=imagePromptResults[0].prompt,
-                repo=self.imageRepo,
-                date=imagePromptResults[0].date,
-                time=imagePromptResults[0].time
+            return GetImagePrompsResult(
+                imagePromptResults, 
+                nextToken=nextToken,
+                errorMessage=errorMessage,
             )
-        )
-
+    
 
     def save_image(self, prompt: str, image: Image) -> ImagePrompResult:
-        directoryResult = self.generate_png_path(prompt)
-        image.save(directoryResult.absolutePath, "PNG")
+        """
+        Method to save images and their associated prompt to the file system. Images will be stored and indexed by the
+        date and time in which they were saved. Additionally the image will be saved to whatever repo this repo manager
+        is currently set to.
+
+        Parameters
+        ----------
+        prompt (str):
+            The prompt used to save the image
+
+        image: (Image):
+            The actual image to be saved
+
+        Returns
+        -------
+        ImagePrompResult
+            The meta information after the image was saved.
+        """
+        directoryResult, absolutePath = self.generate_image_prompt_directory(prompt)
+        image.save(absolutePath/"1.png", "PNG")
         return ImagePrompResult(
             prompt = directoryResult.prompt,
             repo = directoryResult.repo,
             date = directoryResult.date,
             time = directoryResult.time,
             num = 1,
-            pngPaths = [directoryResult.absolutePath/"1.png"]
+            pngPaths = [absolutePath/"1.png"]
         )

@@ -1,8 +1,10 @@
+import logging
 from typing import Callable
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QImage
 
+from ui.dialogs.ErrorMessage import ErrorMessage
 from ui.widgets.home.ImageMeta import ImageMetaInfo
 
 from repoManager.RepoManager import DIRECTION, RepoManager
@@ -105,15 +107,20 @@ class GalleryPage(QWidget):
         getImagesResult = self.repoManager.get_init_images(PAGE_SIZE)
 
         if(getImagesResult is not None):
+            if(getImagesResult.errorMessage is not None):
+                ErrorMessage(getImagesResult.errorMessage).exec()
+        
             self.rightBookmarkPageToken = getImagesResult.nextToken
             self.gallery.replace_display(getImagesResult.results)
 
 
     def change_page(self, currentNextToken = None, direction: DIRECTION = DIRECTION.FORWARD):
-   
         getImagesResult = self.repoManager.get_images(PAGE_SIZE, token=currentNextToken, direction=direction)
 
         if(getImagesResult is not None):
+            if(getImagesResult.errorMessage is not None):
+                ErrorMessage(getImagesResult.errorMessage).exec()
+
             self.gallery.replace_display(getImagesResult.results)
             # Set the new "edge" token based on the direciton we are going
             if(direction is DIRECTION.FORWARD):

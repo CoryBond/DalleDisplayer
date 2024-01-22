@@ -1,4 +1,5 @@
 import logging
+import traceback
 from speech_recognition import Recognizer, UnknownValueError, RequestError, Microphone
 import logging
 from typing import Callable
@@ -53,7 +54,7 @@ class GoogleSpeechRecognizer(SpeechRecognizer):
                 except UnknownValueError:
                     logging.warn("Google Speech Recognition could not understand audio")
                 except RequestError as e:
-                    logging.error("Could not request results from Google Speech Recognition service; {0}".format(e))
+                    logging.error("Could not request results from Google Speech Recognition service; {0}".format(traceback.format_exc()))
 
             # use the microphone as source for input.
             mic = Microphone()

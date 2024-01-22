@@ -34,3 +34,15 @@ def override_with_mock_image_provider(container: Container, imageProvider: Image
 
     container.imageProvider.override(imageProvider)
     return
+
+
+@patch('imageProviders.ImageProvider')
+def override_with_mock_image_provider(container: Container, imageProvider: ImageProvider):
+    """
+    Creates a generic mock of Repo and adds it to the dependency injection container
+    """
+    imageProvider.engine_name = lambda : "mockGenerator"
+    imageProvider.get_image_from_string = test_image_generator()
+
+    container.imageProvider.override(imageProvider)
+    return

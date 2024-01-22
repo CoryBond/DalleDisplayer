@@ -15,7 +15,8 @@ dependencies  = [
   "dependency_injector",
   "qdarkstyle",
   "requests",
-  "SpeechRecognition"
+  "SpeechRecognition",
+  "PyYAML"
 ]
 
 
@@ -24,7 +25,8 @@ test = [
     "pytest",
     "pytest-env",
     "pytest-timeout",
-    "pytest-qt"
+    "pytest-qt",
+    "pyfakefs"
 ]
 
 

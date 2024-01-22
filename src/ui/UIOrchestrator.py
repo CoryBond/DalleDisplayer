@@ -48,9 +48,6 @@ class UIOrchestrator():
 
         # Connect gallery actions to home page
         def loadImageToMainPage(metaInfo: ImageMetaInfo, image: QImage):
-            print("click3")
-            print(metaInfo)
-            print(image)
             self.homePage.loadImageSignal.emit(metaInfo, image)
             self.mainWindow.route_to_page(self.homePage)
 

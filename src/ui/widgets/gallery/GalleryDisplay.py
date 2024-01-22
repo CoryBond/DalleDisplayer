@@ -59,7 +59,6 @@ class ImagesDisplay(QWidget):
         label.setPixmap(pixmap.scaled(label.size(), Qt.IgnoreAspectRatio))
         def leftClickEvent(event):
             if event.button() == Qt.LeftButton:
-                print("click")
                 self.imageClickedSignal.emit(
                     ImageMetaInfo(
                         prompt=image.prompt, date=image.date, time=image.time, engine=image.repo, num="1"

@@ -62,9 +62,6 @@ class ImageMeta(QWidget):
         # clear the existing layout
         clear_layout(layout=self.layout())
 
-        print("metaInfo")
-        print(str(metaInfo))
-
         # Replace layout contents with new meta info
         metaGroup = QGroupBox("Image Meta")
         metaLayout = QVBoxLayout()
