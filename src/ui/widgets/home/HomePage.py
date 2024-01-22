@@ -27,6 +27,7 @@ class ProcessRunnable(QRunnable):
 
 def background_create_image_process(imageProvider: ImageProvider, prompt: str, loadSignal: pyqtSignal(str, object)):
     response = imageProvider.get_image_from_string(prompt)
+
     loadSignal.emit(prompt, response)
 
 
@@ -75,7 +76,7 @@ class HomePage(QSplitter):
     def init_ui(self, lastImageResult: ImagePrompResult, speechRecognizer : SpeechRecognizer):
         self.imageGenerator = ImageGenerator(createImageSignal = self.createImageSignal, speechRecognizer = speechRecognizer)
         self.addWidget(self.imageGenerator)
-        self.imageViewer = ImageViewer(lastImageResult.pngPaths[0])
+        self.imageViewer = ImageViewer(lastImageResult.pngPaths[0] if lastImageResult is not None else None)
         self.addWidget(self.imageViewer)
         self.imageMeta = ImageMeta(ImageMetaInfo(
                 prompt= lastImageResult.prompt, 
@@ -83,7 +84,7 @@ class HomePage(QSplitter):
                 time= lastImageResult.time, 
                 engine= lastImageResult.repo,
                 num= lastImageResult.num
-            ))
+            ) if lastImageResult is not None else None)
         self.addWidget(self.imageMeta)
         self.setSizes([200, 800, 0])
 
@@ -95,13 +96,14 @@ class HomePage(QSplitter):
             ErrorMessage(response['errorMessage']).exec()
         else:
             saveResult = self.repoManager.save_image(prompt, response['img'])
+
             self.imageViewer.replace_image(saveResult.pngPaths[0].as_posix())
             self.imageMeta.loadMetaSignal.emit(ImageMetaInfo(
                 prompt= prompt,
                 date= saveResult.date,
                 time= saveResult.time,
                 engine= saveResult.repo,
-                num= saveResult.num
+                num=str(saveResult.num)
             ))
 
         self.loadingScreen.stop()
@@ -116,5 +118,5 @@ class HomePage(QSplitter):
     def create_image_action(self, prompt: str):
         self.loadingScreen.showWithAnimation()
 
-        imageGenerationProcess = ProcessRunnable(target=background_create_image_process, args=(self.imageProvider, prompt, self.loadImageSignal))
+        imageGenerationProcess = ProcessRunnable(target=background_create_image_process, args=(self.imageProvider, prompt, self.loadNewImageSignal))
         self.threadpool.start(imageGenerationProcess)

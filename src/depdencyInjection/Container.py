@@ -38,7 +38,8 @@ class Container(containers.DeclarativeContainer):
 
     repoManager = providers.Singleton(
         RepoManager,
-        imageProvider.provided.engine_name.call(),
+        config.repos.imageReposPath,
+        config.repos.startingRepo,
     )
 
     home = providers.Singleton(HomePage, repoManager, imageProvider, speechRecognizer),

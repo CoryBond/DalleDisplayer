@@ -1,9 +1,13 @@
 from io import BytesIO
 import logging
+import traceback
 import openai
 import requests
 from imageProviders.ImageProvider import ImageProvider, ImageProviderResult
 from PIL import Image
+
+
+ENGINE_NAME = "Dall-e"
 
 
 class DalleProvider(ImageProvider):
@@ -27,7 +31,7 @@ class DalleProvider(ImageProvider):
     
 
     def engine_name(self):
-        return "Dall-e"
+        return ENGINE_NAME
 
 
     def get_image_from_string(self, prompt) -> ImageProviderResult:
@@ -57,19 +61,19 @@ class DalleProvider(ImageProvider):
             img = Image.open(BytesIO(requests.get(url).content))
 
         except openai.APIConnectionError as e:
-            logging.error(e)
+            logging.error(traceback.format_exc())  
             errorMessage = "Unable to contact OpenAI. Internet or provider may be down."
         except openai.AuthenticationError as e:
-            logging.error(e)
+            logging.error(traceback.format_exc())  
             errorMessage = "Error authenticating with OpenAI. Please check your credentials in '.creds'."
         except openai.RateLimitError as e:
-            logging.error(e)
+            logging.error(traceback.format_exc())  
             errorMessage = "OpenAI reporting Rate Limiting. Please check your account at openai.com."
         except openai.APITimeoutError as e:
-            logging.error(e)            
+            logging.error(traceback.format_exc())            
             errorMessage = "Timeout contacting OpenAI. Internet or provider may be down."
         except BaseException as e:
-            logging.error(e)
+            logging.error(traceback.format_exc())  
             errorMessage = str(e)
         
         return { 'img': img, 'errorMessage': errorMessage }

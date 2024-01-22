@@ -43,5 +43,4 @@ class MainWindow(QMainWindow):
 
 
     def route_to_page(self, widget):
-        print(widget)
         self.central_widget.setCurrentWidget(widget)
