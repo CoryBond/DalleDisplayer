@@ -27,6 +27,9 @@ class ProcessRunnable(QRunnable):
 
 def background_create_image_process(imageProvider: ImageProvider, prompt: str, loadSignal: pyqtSignal(str, object)):
     response = imageProvider.get_image_from_string(prompt)
+    print(prompt)
+    print(response)
+
     loadSignal.emit(prompt, response)
 
 
@@ -94,14 +97,17 @@ class HomePage(QSplitter):
             self.loadingScreen.stop()
             ErrorMessage(response['errorMessage']).exec()
         else:
+            print("Here")
             saveResult = self.repoManager.save_image(prompt, response['img'])
+            print(saveResult)
+
             self.imageViewer.replace_image(saveResult.pngPaths[0].as_posix())
             self.imageMeta.loadMetaSignal.emit(ImageMetaInfo(
                 prompt= prompt,
                 date= saveResult.date,
                 time= saveResult.time,
                 engine= saveResult.repo,
-                num= saveResult.num
+                num=str(saveResult.num)
             ))
 
         self.loadingScreen.stop()
@@ -116,5 +122,5 @@ class HomePage(QSplitter):
     def create_image_action(self, prompt: str):
         self.loadingScreen.showWithAnimation()
 
-        imageGenerationProcess = ProcessRunnable(target=background_create_image_process, args=(self.imageProvider, prompt, self.loadImageSignal))
+        imageGenerationProcess = ProcessRunnable(target=background_create_image_process, args=(self.imageProvider, prompt, self.loadNewImageSignal))
         self.threadpool.start(imageGenerationProcess)

@@ -292,7 +292,8 @@ class RepoManager(object):
 
     def save_image(self, prompt: str, image: Image) -> ImagePrompResult:
         directoryResult = self.generate_png_path(prompt)
-        image.save(directoryResult.absolutePath, "PNG")
+        print(directoryResult)
+        image.save(directoryResult.absolutePath/"1.png", "PNG")
         return ImagePrompResult(
             prompt = directoryResult.prompt,
             repo = directoryResult.repo,
