@@ -42,22 +42,22 @@ class Container(containers.DeclarativeContainer):
         config.repos.startingRepo,
     )
 
-    home = providers.Singleton(HomePage, repoManager, imageProvider, speechRecognizer),
-    gallery = providers.Singleton(GalleryPage, repoManager),
+    home = providers.Singleton(HomePage, repoManager, imageProvider, speechRecognizer)
+    gallery = providers.Singleton(GalleryPage, repoManager)
 
-    homePageMeta = providers.Singleton(PageMetaDecorator, home[0], PageName.HOME, PageCaption.HOME, PageHint.HOME),
-    galleryPageMeta = providers.Singleton(PageMetaDecorator, gallery[0], PageName.GALLERY, PageCaption.GALLERY, PageHint.GALLERY),
+    homePageMeta = providers.Singleton(PageMetaDecorator, home, PageName.HOME, PageCaption.HOME, PageHint.HOME)
+    galleryPageMeta = providers.Singleton(PageMetaDecorator, gallery, PageName.GALLERY, PageCaption.GALLERY, PageHint.GALLERY)
 
     mainWindow = providers.Singleton(
         MainWindow,
-        homePageMeta[0],
-        galleryPageMeta[0]
+        homePageMeta,
+        galleryPageMeta
     )
 
     uiOrchestrator = providers.Singleton(
         UIOrchestrator,
         qApplicationManager,
-        home[0],
-        gallery[0],
+        home,
+        gallery,
         mainWindow
     )

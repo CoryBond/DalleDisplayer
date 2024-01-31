@@ -1,5 +1,4 @@
 import logging
-from typing import TypedDict
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QFormLayout, QGroupBox, QLabel
 from PyQt5.QtCore import pyqtSignal
 
@@ -62,20 +61,21 @@ class ImageMeta(QWidget):
         # clear the existing layout
         clear_layout(layout=self.layout())
 
-        # Replace layout contents with new meta info
-        metaGroup = QGroupBox("Image Meta")
-        metaLayout = QVBoxLayout()
+        if(metaInfo is not None):
+            # Replace layout contents with new meta info
+            metaGroup = QGroupBox("Image Meta")
+            metaLayout = QVBoxLayout()
 
-        metaDetailLayout = QFormLayout()
+            metaDetailLayout = QFormLayout()
 
-        metaDetailLayout.addRow(QLabel("Prompt: "), QLabel(metaInfo.prompt))
-        metaDetailLayout.addRow(QLabel("Date: "), QLabel(metaInfo.date))
-        metaDetailLayout.addRow(QLabel("Time: "), QLabel(metaInfo.time))
-        metaDetailLayout.addRow(QLabel("Engine: "), QLabel(metaInfo.engine))
-        metaDetailLayout.addRow(QLabel("Num: "), QLabel(metaInfo.num))
+            metaDetailLayout.addRow(QLabel("Prompt: "), QLabel(metaInfo.prompt))
+            metaDetailLayout.addRow(QLabel("Date: "), QLabel(metaInfo.date))
+            metaDetailLayout.addRow(QLabel("Time: "), QLabel(metaInfo.time))
+            metaDetailLayout.addRow(QLabel("Engine: "), QLabel(metaInfo.engine))
+            metaDetailLayout.addRow(QLabel("Num: "), QLabel(metaInfo.num))
 
-        metaLayout.addLayout(metaDetailLayout)
+            metaLayout.addLayout(metaDetailLayout)
 
-        metaGroup.setLayout(metaLayout)
-        self.layout().addWidget(metaGroup)
+            metaGroup.setLayout(metaLayout)
+            self.layout().addWidget(metaGroup)
         

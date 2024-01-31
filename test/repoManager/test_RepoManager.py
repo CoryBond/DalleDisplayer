@@ -13,10 +13,10 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 TEST_RESOURCES_FOLDER_PATH = Path(TEST_RESOURCES_FOLDER_NAME)
 
 
-def test_empty_fs_get_init_images(fs: FakeFilesystem):
+def test_empty_fs_get_images(fs: FakeFilesystem):
    """
    Given emptry file system
-   When get_init_images called
+   When get_images called
    Then return no results
    """
 
@@ -27,7 +27,7 @@ def test_empty_fs_get_init_images(fs: FakeFilesystem):
    repoManager: RepoManager = container.repoManager()
 
    # Act
-   result = repoManager.get_init_images(2)
+   result = repoManager.get_images(2)
    
    # Assert
    assert result.results == [],  "result.results"
@@ -35,10 +35,10 @@ def test_empty_fs_get_init_images(fs: FakeFilesystem):
    assert result.errorMessage is None, "result.errorMessage"
 
 
-def test_images_exist_get_init_images(fs: FakeFilesystem):
+def test_images_exist_get_images(fs: FakeFilesystem):
    """
    Given single prompt entry
-   When get_init_images for more then that called
+   When get_images for more then that called
    Then only the single entry returned
    """
 
@@ -56,7 +56,7 @@ def test_images_exist_get_init_images(fs: FakeFilesystem):
    populate_fs_with(fs, TEST_RESOURCES_FOLDER_PATH/"testRepo", fsState)
 
    # Act
-   result = repoManager.get_init_images(2)
+   result = repoManager.get_images(2)
    
    # Assert
    assert len(result.results) == 1
@@ -72,10 +72,10 @@ def test_images_exist_get_init_images(fs: FakeFilesystem):
 
 
 
-def test_lots_of_images_exist_get_init_images(fs: FakeFilesystem):
+def test_lots_of_images_exist_get_images(fs: FakeFilesystem):
    """
    Given lots of prompt entries
-   When get_init_images for less then that called
+   When get_images for less then that called
    Then entries requested returned
    """
 
@@ -97,7 +97,7 @@ def test_lots_of_images_exist_get_init_images(fs: FakeFilesystem):
    populate_fs_with(fs, TEST_RESOURCES_FOLDER_PATH/"testRepo", fsState)
 
    # Act
-   result = repoManager.get_init_images(2)
+   result = repoManager.get_images(2)
    
    # Assert
    assert len(result.results) == 2
@@ -143,7 +143,7 @@ def test_pagination(fs: FakeFilesystem):
    populate_fs_with(fs, TEST_RESOURCES_FOLDER_PATH/"testRepo", fsState)
 
    # Act
-   init_result = repoManager.get_init_images(2)
+   init_result = repoManager.get_images(2)
    result = repoManager.get_images(2, init_result.nextToken)
 
    # Assert
@@ -184,7 +184,7 @@ def test_backwards_pagination_normal(fs: FakeFilesystem):
    populate_fs_with(fs, TEST_RESOURCES_FOLDER_PATH/"testRepo", fsState)
 
    # Act
-   init_result = repoManager.get_init_images(2)
+   init_result = repoManager.get_images(2)
    result = repoManager.get_images(2, init_result.nextToken, direction = DIRECTION.BACKWARD)
 
    # Assert
@@ -229,7 +229,7 @@ def test_backwards_pagination_multi(fs: FakeFilesystem):
    populate_fs_with(fs, TEST_RESOURCES_FOLDER_PATH/"testRepo", fsState)
 
    # Act
-   init_result = repoManager.get_init_images(4)
+   init_result = repoManager.get_images(4)
    result1 = repoManager.get_images(2, init_result.nextToken, direction = DIRECTION.BACKWARD)
    result2 = repoManager.get_images(2, result1.nextToken, direction = DIRECTION.BACKWARD)
 
