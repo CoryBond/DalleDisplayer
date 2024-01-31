@@ -4,6 +4,7 @@ include
 bin
 *.log
 resources/imageRepos
+testResources/imageRepos
 myenv
 dalle.key
 __pycache__

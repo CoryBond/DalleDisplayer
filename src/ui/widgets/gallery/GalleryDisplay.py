@@ -1,4 +1,5 @@
 
+import logging
 from pathlib import Path
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QScrollArea
 from PyQt5.QtCore import pyqtSignal, Qt
@@ -29,9 +30,11 @@ class ImagesDisplay(QWidget):
 
         layout.addWidget(QHLine())
 
-        layout.addWidget(self.create_image(image, image.pngPaths[0]))
+        self.image_label = self.create_image(image, image.pngPaths[0])
+        layout.addWidget(self.image_label)
 
         self.setLayout(layout)
+        self.image_meta = image
 
 
     def create_header(self, image: ImagePrompResult) -> QVBoxLayout:
@@ -87,11 +90,14 @@ class GalleryDisplay(QScrollArea):
         # First remove widget
         self.takeWidget()
         # Add in new widget
-        self.setWidget(self.create_scrollable_widget(images))
+        self.contentWidget = self.create_scrollable_widget(images)
+        self.setWidget( self.contentWidget)
 
 
     def create_scrollable_widget(self, images: List[ImagePrompResult]):
         layout = QVBoxLayout()
+
+        logging.debug(f'Recieving {len(images)} images')
 
         for image in images:
             imageDisplay = ImagesDisplay(image)

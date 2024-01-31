@@ -1,3 +1,4 @@
+import logging
 from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtCore import pyqtSignal, QRunnable, QThreadPool
 
@@ -26,15 +27,19 @@ class ProcessRunnable(QRunnable):
 
 
 def background_create_image_process(imageProvider: ImageProvider, prompt: str, loadSignal: pyqtSignal(str, object)):
-    response = imageProvider.get_image_from_string(prompt)
+    if(prompt is not None):
+        response = imageProvider.get_image_from_string(prompt)
 
-    loadSignal.emit(prompt, response)
+        loadSignal.emit(prompt, response)
+    else:
+        logging.warning("Prompt not provided!")
 
 
 class HomePage(QSplitter):
     createImageSignal = pyqtSignal(str)
     loadNewImageSignal = pyqtSignal(str, object)
     loadImageSignal = pyqtSignal(ImageMetaInfo, object)
+    saveImageSignal = pyqtSignal()
 
     """
     QT Widget to display a singular and move a singular image.
@@ -76,7 +81,7 @@ class HomePage(QSplitter):
     def init_ui(self, lastImageResult: ImagePrompResult, speechRecognizer : SpeechRecognizer):
         self.imageGenerator = ImageGenerator(createImageSignal = self.createImageSignal, speechRecognizer = speechRecognizer)
         self.addWidget(self.imageGenerator)
-        self.imageViewer = ImageViewer(lastImageResult.pngPaths[0] if lastImageResult is not None else None)
+        self.imageViewer = ImageViewer(lastImageResult.pngPaths[0] if lastImageResult is not None and len(lastImageResult.pngPaths) > 0 else None)
         self.addWidget(self.imageViewer)
         self.imageMeta = ImageMeta(ImageMetaInfo(
                 prompt= lastImageResult.prompt, 
@@ -91,11 +96,13 @@ class HomePage(QSplitter):
 
     def load_new_image_response(self, prompt: str, response: ImageProviderResult):        
         if response['errorMessage'] != None:
+            logging.info("error message  : " + response['errorMessage'])
             # Remove loading Screen so it doesn't overlap the error message
             self.loadingScreen.stop()
             ErrorMessage(response['errorMessage']).exec()
         else:
             saveResult = self.repoManager.save_image(prompt, response['img'])
+            self.saveImageSignal.emit()
 
             self.imageViewer.replace_image(saveResult.pngPaths[0].as_posix())
             self.imageMeta.loadMetaSignal.emit(ImageMetaInfo(

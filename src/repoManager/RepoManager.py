@@ -148,10 +148,14 @@ class RepoManager(object):
         ]
 
 
+    def _generate_abs_image_prompt_path(self, directory: ImagePromptDirectory):
+        directorySubPath = generate_image_prompt_path(directory)
+        return self.reposPath/directorySubPath
+
+
     def _get_files(self, directory: ImagePromptDirectory) -> ImagePrompResult:
         logging.info(f"Attempting to load images from path {self.reposPath} and directory {directory}")
-        directorySubPath = generate_image_prompt_path(directory)
-        fullPathToImagePromptFolder = self.reposPath/directorySubPath
+        fullPathToImagePromptFolder = self._generate_abs_image_prompt_path(directory)
 
         fullImagePaths = [fullPathToImagePromptFolder/img_file for img_file in os.listdir(fullPathToImagePromptFolder)]
 
@@ -181,50 +185,12 @@ class RepoManager(object):
         """
         logging.info("Attempting to load last image created")
         try:
-            return self.get_init_images(number = 1).results[0]
+            return self.get_images(number = 1).results[0]
         except:
             return None
 
 
-    def get_init_images(self, number: int) -> GetImagePrompsResult:
-        """
-        This method is used to "hop into" the pagination system for clients who lack any starting tokens.
-
-        In the pagination system, absent tokens represent the exhuastion of results and tokenless pagination
-        requests are invalid. This method allows clients to get results and an initial token so they continue
-        pagination.
-
-        NOTE: The more I think about it a get_init_images "hop in" method makes less and less sense. The purpose
-        of invalidating absent tokens was a safety percaution on the repo managers side in case the caller
-        made the mistake of not providing a token. It also provided a way to implement "go to beginning page"....
-        But I think in most token based pagination systems an absent token... represents basically what 
-        get_init_images is trying to do here. It gets you the first page. So why not just do that and if the caller
-        makes a mistake... then they made a mistake!
-
-        Parameters
-        ----------
-        number (int): 
-            The number of prompts to get images from to get. It does NOT represent how many images to get
-
-        Returns
-        -------
-        GetImagePrompsResult
-            A model representing the results of prompts, their images, or optionally error messages.
-            Also contains a nextToken if getting images is not exhuasted.
-            Results are sorted by most recent date then most recent time. 
-
-        """
-        try:
-            return self._get_images(number, startingDirectory=None, forceIncludeCurrentDirectoryInResults=True)
-        except BaseException as e:
-            logging.error(traceback.format_exc())
-            return GetImagePrompsResult(
-                results=[],
-                errorMessage = f'Critical error retrieving any results : {str(e)}',
-            )
-
-
-    def get_images(self, number: int, token: NextToken, direction: DIRECTION = DIRECTION.FORWARD) -> GetImagePrompsResult:
+    def get_images(self, number: int, token: NextToken = None, direction: DIRECTION = DIRECTION.FORWARD) -> GetImagePrompsResult:
         """
         Pagination call to get prompts and their images from the repo. Results will be returned in order by the most recent date 
         and time.
@@ -266,12 +232,8 @@ class RepoManager(object):
 
         """
         try:
-            if token is not None:
-                logging.debug(f"Provided token : {token}")
-                return self._get_images(number, startingDirectory=token, direction=direction)
-            else:
-                logging.warn(f"No images will be returned due to invalid token {token}")
-                return None
+            logging.debug(f"Provided token : {token}")
+            return self._get_images(number, startingDirectory=token, direction=direction)
         except BaseException as e:
             logging.error(traceback.format_exc())
             return GetImagePrompsResult(
@@ -279,21 +241,24 @@ class RepoManager(object):
                 errorMessage = f'Critical error retrieving any results : {str(e)}',
             )
 
-    def _get_images(self, number: int, startingDirectory: ImagePromptDirectory = None, direction: DIRECTION = DIRECTION.FORWARD, forceIncludeCurrentDirectoryInResults: bool = False) -> GetImagePrompsResult:
+
+    def _directory_exists(self, directory: ImagePromptDirectory):
+        return directory is not None and os.path.exists(self._generate_abs_image_prompt_path(directory))
+
+
+    def _get_images(self, number: int, startingDirectory: ImagePromptDirectory = None, direction: DIRECTION = DIRECTION.FORWARD) -> GetImagePrompsResult:
         logging.info("Getting images")
         if(number < 1):
             return GetImagePrompsResult(results=[], errorMessage="Number must be greater then 0")
 
-        directoryIterator = DirectoryIterator(pathToDirectories=self.imageRepo, startingDirectory=startingDirectory, direction=direction)
+        directoryIterator = DirectoryIterator(pathToDirectories=self.imageRepo, startingDirectory=startingDirectory)
         imagePromptResults: List[ImagePrompResult] = []
         errorMessage = None
 
         try:
-            if(forceIncludeCurrentDirectoryInResults or direction is DIRECTION.BACKWARD):
-                firstDirectory = directoryIterator.get_current_image_prompt_directory()
-                if(firstDirectory is not None):
-                    logging.debug(f"Including current directory in results")
-                    imagePromptResults.append(self._get_files(directory=firstDirectory))
+            # If going backwards add the current directory but only if it actually exists. Otherwise continue iterating from the start directory.
+            if(direction is DIRECTION.BACKWARD and self._directory_exists(startingDirectory)):
+                imagePromptResults.append(self._get_files(directory=startingDirectory))
 
             # Iterate prompt directories until either we found enough prompt directories to match the number requested or until there are none left in the direction we are iterating
             for _ in range(len(imagePromptResults), number):
@@ -345,7 +310,18 @@ class RepoManager(object):
             The meta information after the image was saved.
         """
         directoryResult, absolutePath = self.generate_image_prompt_directory(prompt)
-        image.save(absolutePath/"1.png", "PNG")
+
+        try:
+            image.save(absolutePath/"1.png", "PNG")
+            logging.info(f'Saved {absolutePath/"1.png"}')
+        except BaseException as e:
+            # In scenarios where the Pillow libraries encoder doesn't work 
+            # (fake filesystem issues : https://github.com/pytest-dev/pyfakefs/discussions/858)
+            # attempt to save the file via native os API
+            with open(absolutePath/"1.png", 'wb') as f:
+                f.write(image.tobytes())
+                logging.info(f'Saved {absolutePath/"1.png"}')
+
         return ImagePrompResult(
             prompt = directoryResult.prompt,
             repo = directoryResult.repo,

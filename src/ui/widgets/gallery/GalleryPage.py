@@ -3,6 +3,7 @@ from typing import Callable
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QImage
+from repoManager.Models import NextToken
 
 from ui.dialogs.ErrorMessage import ErrorMessage
 from ui.widgets.home.ImageMeta import ImageMetaInfo
@@ -58,6 +59,7 @@ class GalleryPage(QWidget):
         Returns if the current view has any image loaded to it currently
     """
     imageClickedSignal = pyqtSignal(ImageMetaInfo, QImage)
+    galleryRefreshedSignal = pyqtSignal()
 
     def __init__(self, repoManager: RepoManager):
         super().__init__()
@@ -65,15 +67,27 @@ class GalleryPage(QWidget):
 
         self.repoManager = repoManager
 
-        # Set bookmarks
-        self.leftBookmarkPageToken = None
-        self.rightBookmarkPageToken = None
-
         self.init_ui()
+
+        # Set bookmarks
+        self.set_left_bookmark(None)
+        self.set_right_bookmark(None)
+
 
         # pass through emit from child to this parent
         self.gallery.imageClickedSignal.connect(self.imageClickedSignal.emit)
+        self.galleryRefreshedSignal.connect(self.refresh_page)
 
+
+    def set_left_bookmark(self, bookmark: NextToken):
+        self.backward_page_button.setDisabled(bookmark is None)
+        self.leftBookmarkPageToken = bookmark
+        
+
+    def set_right_bookmark(self, bookmark: NextToken):
+        self.forward_page_button.setDisabled(bookmark is None)
+        self.rightBookmarkPageToken = bookmark
+        
 
     def init_ui(self):
 
@@ -82,15 +96,14 @@ class GalleryPage(QWidget):
 
         # create the stacked widget that will contain each page...       
         self.gallery = GalleryDisplay()
-        self.init_page()
-
         layout.addWidget(self.gallery)
 
         # setup the layout for the page numbers below the stacked widget
         self.pagination_layout = QHBoxLayout()
         self.pagination_layout.addStretch(0)
         self.pagination_layout.addWidget(generateWiderButton("<<", lambda _ : self.init_page()))
-        self.pagination_layout.addWidget(generateWiderButton("<", lambda _ : self.change_page(self.leftBookmarkPageToken, DIRECTION.BACKWARD)))
+        self.backward_page_button = generateWiderButton("<", lambda _ : self.change_page(self.leftBookmarkPageToken, DIRECTION.BACKWARD))
+        self.pagination_layout.addWidget(self.backward_page_button)
 
         for i in range(1, 3):
             page_link = PageLink(str(i), parent=self)
@@ -98,19 +111,23 @@ class GalleryPage(QWidget):
             # page_link.clicked.connect(self.switch_page)
         page_link = PageLink("...", parent=self)
         self.pagination_layout.addWidget(page_link)
-        self.pagination_layout.addWidget(generateWiderButton(">", lambda _ : self.change_page(self.rightBookmarkPageToken, DIRECTION.FORWARD)))
+        self.forward_page_button = generateWiderButton(">", lambda _ : self.change_page(self.rightBookmarkPageToken, DIRECTION.FORWARD))
+        self.pagination_layout.addWidget(self.forward_page_button)
         layout.addLayout(self.pagination_layout)
+
+
+        self.init_page()
 
 
     def init_page(self,):
   
-        getImagesResult = self.repoManager.get_init_images(PAGE_SIZE)
+        getImagesResult = self.repoManager.get_images(PAGE_SIZE)
 
         if(getImagesResult is not None):
             if(getImagesResult.errorMessage is not None):
                 ErrorMessage(getImagesResult.errorMessage).exec()
         
-            self.rightBookmarkPageToken = getImagesResult.nextToken
+            self.set_right_bookmark(getImagesResult.nextToken)
             self.gallery.replace_display(getImagesResult.results)
 
 
@@ -124,8 +141,13 @@ class GalleryPage(QWidget):
             self.gallery.replace_display(getImagesResult.results)
             # Set the new "edge" token based on the direciton we are going
             if(direction is DIRECTION.FORWARD):
-                self.leftBookmarkPageToken = self.rightBookmarkPageToken
-                self.rightBookmarkPageToken = getImagesResult.nextToken
+                self.set_left_bookmark(self.rightBookmarkPageToken)
+                self.set_right_bookmark(getImagesResult.nextToken)
             else:
-                self.rightBookmarkPageToken = self.leftBookmarkPageToken
-                self.leftBookmarkPageToken = getImagesResult.nextToken
+                self.set_right_bookmark(self.leftBookmarkPageToken)
+                self.set_left_bookmark(getImagesResult.nextToken)
+
+
+    def refresh_page(self):
+        logging.info("refresh_page")
+        self.change_page(currentNextToken = self.leftBookmarkPageToken)

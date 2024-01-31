@@ -46,14 +46,17 @@ class UIOrchestrator():
         self.galleryPage = galleryPage
         self.mainWindow = mainWindow
 
-        # Connect gallery actions to home page
+        # Clicking on gallery images refocuses them on the homepage
         def loadImageToMainPage(metaInfo: ImageMetaInfo, image: QImage):
             self.homePage.loadImageSignal.emit(metaInfo, image)
             self.mainWindow.route_to_page(self.homePage)
+        self.galleryPage.imageClickedSignal.connect(loadImageToMainPage)
 
-        galleryPage.imageClickedSignal.connect(loadImageToMainPage)
-
-        return
+        # Home Page Image Generation Must Refresh Gallery
+        def refreshGallery():
+            logging.info("HEEEEEE")
+            self.galleryPage.galleryRefreshedSignal.emit()
+        self.homePage.saveImageSignal.connect(refreshGallery)
 
 
     def start(self):
