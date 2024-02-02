@@ -4,14 +4,23 @@ Test config file for all tests
 import pytest
 
 import time
+from pathlib import Path
 from unittest.mock import patch                                       
 from depdencyInjection.Container import Container
 from imageProviders.ImageProvider import ImageProvider, ImageProviderResult
 from PIL import Image
 
-from utils.pathingUtils import get_project_root
+from utils.pathingUtils import get_project_root, get_or_create_resources
 from pyfakefs.fake_filesystem import FakeFilesystem 
-from constantsTestUtil import TEST_RESOURCES_FOLDER_NAME, TEST_CONFIG
+
+
+TEST_RESOURCES_FOLDER_NAME = "testResources"
+
+TEST_RESOURCES_FOLDER_PATH = Path(TEST_RESOURCES_FOLDER_NAME)
+
+TEST_RESOURCES = get_or_create_resources(TEST_RESOURCES_FOLDER_NAME)
+
+TEST_CONFIG = TEST_RESOURCES/"configs"/"test_config.yml"
 
 
 def test_image_generator():

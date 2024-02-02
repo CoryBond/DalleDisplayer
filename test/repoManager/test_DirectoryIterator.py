@@ -4,7 +4,6 @@ from typing import Dict, List, Union
 
 import pytest
 
-from constantsTestUtil import TEST_RESOURCES_FOLDER_NAME
 from repoManager.DirectoryIterator import DirectoryIterator
 
 from utils.pathingUtils import DIRECTION
@@ -14,6 +13,9 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 
 TimeWithPromptDictType = Dict[str, List[str]]
 DateDictType = Dict[str, TimeWithPromptDictType]
+
+
+TEST_RESOURCES_FOLDER_NAME = "testResources"
 
 
 def populate_fs_with(fs: FakeFilesystem, path: Union[Path, str], dateDictStructure : DateDictType):
@@ -58,6 +60,7 @@ def test_empty_repo_get_current_image_prompt_directory(fs: FakeFilesystem):
    Then returned directory is none
    """
    # Arrange
+   
    fsState = {}
    populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
 
