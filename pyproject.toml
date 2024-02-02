@@ -40,6 +40,10 @@ pythonpath = [
   "test"
 ]
 qt_api="pyqt5"
+log_cli = true
+log_cli_level = "DEBUG"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 env = [
     # Fixes qt not working in test environmnet. See : https://stackoverflow.com/questions/68036484/qt-qpa-plugin-could-not-load-the-qt-platform-plugin-xcb-in-even-though-it
     "QT_QPA_PLATFORM = offscreen"

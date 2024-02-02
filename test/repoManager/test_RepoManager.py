@@ -3,7 +3,7 @@ from pathlib import Path
 from utils.pathingUtils import DIRECTION
 
 from depdencyInjection.Container import Container
-from constantsTestUtil import TEST_RESOURCES_FOLDER_NAME, TEST_CONFIG
+from constantsTestUtil import TEST_RESOURCES_FOLDER_NAME
 from repoManager.RepoManager import RepoManager
 from repoManager.test_DirectoryIterator import populate_fs_with
 
@@ -13,7 +13,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 TEST_RESOURCES_FOLDER_PATH = Path(TEST_RESOURCES_FOLDER_NAME)
 
 
-def test_empty_fs_get_images(fs: FakeFilesystem):
+def test_empty_fs_get_images(containerWithMocks: Container):
    """
    Given emptry file system
    When get_images called
@@ -21,10 +21,7 @@ def test_empty_fs_get_images(fs: FakeFilesystem):
    """
 
    # Arrange
-   container = Container()
-   container.config.from_yaml(TEST_CONFIG.as_posix())
-   container.config.repos.imageReposPath.from_value(TEST_RESOURCES_FOLDER_NAME)
-   repoManager: RepoManager = container.repoManager()
+   repoManager: RepoManager = containerWithMocks.repoManager()
 
    # Act
    result = repoManager.get_images(2)
@@ -35,7 +32,7 @@ def test_empty_fs_get_images(fs: FakeFilesystem):
    assert result.errorMessage is None, "result.errorMessage"
 
 
-def test_images_exist_get_images(fs: FakeFilesystem):
+def test_images_exist_get_images(containerWithMocks: Container, fs: FakeFilesystem):
    """
    Given single prompt entry
    When get_images for more then that called
@@ -43,10 +40,7 @@ def test_images_exist_get_images(fs: FakeFilesystem):
    """
 
    # Arrange
-   container = Container()
-   container.config.from_yaml(TEST_CONFIG.as_posix())
-   container.config.repos.imageReposPath.from_value(TEST_RESOURCES_FOLDER_NAME)
-   repoManager: RepoManager = container.repoManager()
+   repoManager: RepoManager = containerWithMocks.repoManager()
 
    fsState = {
       "2024-01-14": { 
@@ -72,7 +66,7 @@ def test_images_exist_get_images(fs: FakeFilesystem):
 
 
 
-def test_lots_of_images_exist_get_images(fs: FakeFilesystem):
+def test_lots_of_images_exist_get_images(containerWithMocks: Container, fs: FakeFilesystem):
    """
    Given lots of prompt entries
    When get_images for less then that called
@@ -80,10 +74,7 @@ def test_lots_of_images_exist_get_images(fs: FakeFilesystem):
    """
 
    # Arrange
-   container = Container()
-   container.config.from_yaml(TEST_CONFIG.as_posix())
-   container.config.repos.imageReposPath.from_value(TEST_RESOURCES_FOLDER_NAME)
-   repoManager: RepoManager = container.repoManager()
+   repoManager: RepoManager = containerWithMocks.repoManager()
 
    fsState = {
       "2024-01-14": { 
@@ -118,7 +109,7 @@ def test_lots_of_images_exist_get_images(fs: FakeFilesystem):
    assert resultTwo.pngPaths == [Path(TEST_RESOURCES_FOLDER_PATH/"testRepo"/"2024-01-14"/"01:03:45.522668_Donkey Eat Chips"/"1.png")]
 
 
-def test_pagination(fs: FakeFilesystem):
+def test_pagination(containerWithMocks: Container, fs: FakeFilesystem):
    """
    Given lots of prompt entries
    When subsequent calls to get_images with token provided
@@ -126,10 +117,7 @@ def test_pagination(fs: FakeFilesystem):
    """
 
    # Arrange
-   container = Container()
-   container.config.from_yaml(TEST_CONFIG.as_posix())
-   container.config.repos.imageReposPath.from_value(TEST_RESOURCES_FOLDER_NAME)
-   repoManager: RepoManager = container.repoManager()
+   repoManager: RepoManager = containerWithMocks.repoManager()
 
    fsState = {
       "2024-01-14": { 
@@ -159,7 +147,7 @@ def test_pagination(fs: FakeFilesystem):
    assert resultOne.pngPaths == [Path(TEST_RESOURCES_FOLDER_PATH/"testRepo"/"2024-01-13"/"03:03:45.522668_Fiona Eat Chips/1.png")]
 
 
-def test_backwards_pagination_normal(fs: FakeFilesystem):
+def test_backwards_pagination_normal(containerWithMocks: Container, fs: FakeFilesystem):
    """
    Given lots of prompt entries
    When subsequent calls to get_images with token provided (and backwards)
@@ -167,10 +155,7 @@ def test_backwards_pagination_normal(fs: FakeFilesystem):
    """
 
    # Arrange
-   container = Container()
-   container.config.from_yaml(TEST_CONFIG.as_posix())
-   container.config.repos.imageReposPath.from_value(TEST_RESOURCES_FOLDER_NAME)
-   repoManager: RepoManager = container.repoManager()
+   repoManager: RepoManager = containerWithMocks.repoManager()
 
    fsState = {
       "2024-01-14": { 
@@ -202,7 +187,7 @@ def test_backwards_pagination_normal(fs: FakeFilesystem):
    assert resultTwo.pngPaths == [Path(TEST_RESOURCES_FOLDER_PATH/"testRepo"/"2024-01-14"/"01:03:45.522668_Donkey Eat Chips"/"1.png")]
 
 
-def test_backwards_pagination_multi(fs: FakeFilesystem):
+def test_backwards_pagination_multi(containerWithMocks: Container, fs: FakeFilesystem):
    """
    Given lots of prompt entries
    When many subsequent calls to get_images with token provided (and backwards)
@@ -210,10 +195,7 @@ def test_backwards_pagination_multi(fs: FakeFilesystem):
    """
 
    # Arrange
-   container = Container()
-   container.config.from_yaml(TEST_CONFIG.as_posix())
-   container.config.repos.imageReposPath.from_value(TEST_RESOURCES_FOLDER_NAME)
-   repoManager: RepoManager = container.repoManager()
+   repoManager: RepoManager = containerWithMocks.repoManager()
 
    fsState = {
       "2024-01-14": { 

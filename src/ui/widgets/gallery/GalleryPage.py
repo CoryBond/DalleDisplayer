@@ -10,6 +10,7 @@ from ui.widgets.home.ImageMeta import ImageMetaInfo
 
 from repoManager.RepoManager import DIRECTION, RepoManager
 from ui.widgets.gallery.GalleryDisplay import GalleryDisplay
+from utils.qtUtils import clear_layout
 
 
 def generateWiderButton(text: str, callback: Callable = None) -> QPushButton:
@@ -25,6 +26,7 @@ class PageLink(QLabel):
     clicked = pyqtSignal([str])  # Signal emited when label is clicked
 
     def __init__(self, text, parent=None):
+        self.text = text
         super().__init__(text, parent=parent)
         self.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
         self.setStyleSheet("color: blue;") # set text color to blue to emulate a link
@@ -64,15 +66,13 @@ class GalleryPage(QWidget):
     def __init__(self, repoManager: RepoManager):
         super().__init__()
 
-
         self.repoManager = repoManager
+        
+        # Set bookmark variables
+        self.leftBookmarkPageToken = None
+        self.rightBookmarkPageToken = None
 
         self.init_ui()
-
-        # Set bookmarks
-        self.set_left_bookmark(None)
-        self.set_right_bookmark(None)
-
 
         # pass through emit from child to this parent
         self.gallery.imageClickedSignal.connect(self.imageClickedSignal.emit)
@@ -82,7 +82,7 @@ class GalleryPage(QWidget):
     def set_left_bookmark(self, bookmark: NextToken):
         self.backward_page_button.setDisabled(bookmark is None)
         self.leftBookmarkPageToken = bookmark
-        
+
 
     def set_right_bookmark(self, bookmark: NextToken):
         self.forward_page_button.setDisabled(bookmark is None)
@@ -105,22 +105,19 @@ class GalleryPage(QWidget):
         self.backward_page_button = generateWiderButton("<", lambda _ : self.change_page(self.leftBookmarkPageToken, DIRECTION.BACKWARD))
         self.pagination_layout.addWidget(self.backward_page_button)
 
-        for i in range(1, 3):
-            page_link = PageLink(str(i), parent=self)
-            self.pagination_layout.addWidget(page_link)
-            # page_link.clicked.connect(self.switch_page)
-        page_link = PageLink("...", parent=self)
-        self.pagination_layout.addWidget(page_link)
+        self.page_num_layout = QHBoxLayout()
+        self.change_page_nums(DIRECTION.FORWARD)
+        self.pagination_layout.addLayout(self.page_num_layout)
+
         self.forward_page_button = generateWiderButton(">", lambda _ : self.change_page(self.rightBookmarkPageToken, DIRECTION.FORWARD))
         self.pagination_layout.addWidget(self.forward_page_button)
         layout.addLayout(self.pagination_layout)
 
-
         self.init_page()
 
 
-    def init_page(self,):
-  
+    def init_page(self):
+        logging.info("Init First Page")
         getImagesResult = self.repoManager.get_images(PAGE_SIZE)
 
         if(getImagesResult is not None):
@@ -129,6 +126,21 @@ class GalleryPage(QWidget):
         
             self.set_right_bookmark(getImagesResult.nextToken)
             self.gallery.replace_display(getImagesResult.results)
+        
+        self.set_left_bookmark(None)
+
+
+    def change_page_nums(self, direction: DIRECTION):
+
+        if(self.leftBookmarkPageToken is None):
+            self.current_page = PageLink(str(1), parent=self)
+        else:
+            num = int(self.current_page.text)
+            nextNum = num + 1 if direction is DIRECTION.FORWARD else num - 1
+            self.current_page = PageLink(str(nextNum), parent=self)
+
+        clear_layout(self.page_num_layout)
+        self.page_num_layout.addWidget(self.current_page)
 
 
     def change_page(self, currentNextToken = None, direction: DIRECTION = DIRECTION.FORWARD):
@@ -146,6 +158,9 @@ class GalleryPage(QWidget):
             else:
                 self.set_right_bookmark(self.leftBookmarkPageToken)
                 self.set_left_bookmark(getImagesResult.nextToken)
+
+            # Update page num
+            self.change_page_nums(direction)
 
 
     def refresh_page(self):

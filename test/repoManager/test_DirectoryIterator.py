@@ -32,7 +32,7 @@ def populate_fs_with(fs: FakeFilesystem, path: Union[Path, str], dateDictStructu
    for date, timePrompts in dateDictStructure.items():
       fs.create_dir(path/date)
       for timePrompt, images in timePrompts.items():
-         fs.create_dir(path/date/timePrompt)
+         fs.create_dir(directory_path=path/date/timePrompt)
          for image in images:
             fs.create_file(path/date/timePrompt/image)
 
