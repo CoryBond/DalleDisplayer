@@ -10,9 +10,6 @@ from pytestqt.qtbot import QtBot
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 
-from dependencyInjection.containerTestUtil import override_with_mock_image_provider
-
-from constantsTestUtil import TEST_RESOURCES_FOLDER_NAME, TEST_CONFIG, TEST_RESOURCES_FOLDER_PATH
 from repoManager.test_DirectoryIterator import populate_fs_with
 
 from pyfakefs.fake_filesystem import FakeFilesystem 
@@ -27,10 +24,11 @@ def test_gallery_loads_correctly(containerWithMocks: Container, qtbot: QtBot, fs
     """
 
     # Arrange
+    repoManager = containerWithMocks.repoManager()
 
     # Setup fake file system
     fsState = {}
-    populate_fs_with(fs, TEST_RESOURCES_FOLDER_PATH/"testRepo", fsState)
+    populate_fs_with(fs, repoManager.current_repo_abs_path(), fsState)
 
     # Act
     gallery = containerWithMocks.gallery()
@@ -56,6 +54,7 @@ def test_gallery_loads_with_images(containerWithMocks: Container, qtbot: QtBot, 
     """
 
     # Arrange
+    repoManager = containerWithMocks.repoManager()
 
     # Setup fake file system
     fsState = {
@@ -73,7 +72,7 @@ def test_gallery_loads_with_images(containerWithMocks: Container, qtbot: QtBot, 
             "03:03:45.522668_Shrek Eat Chips10": ["1.png"], # second page
         }
     }
-    populate_fs_with(fs, TEST_RESOURCES_FOLDER_PATH/"testRepo", fsState)
+    populate_fs_with(fs, repoManager.current_repo_abs_path(), fsState)
     
     # Act
     gallery = containerWithMocks.gallery()
@@ -102,6 +101,7 @@ def test_gallery_forward_button_click(containerWithMocks: Container, qtbot: QtBo
     """
 
     # Arrange
+    repoManager = containerWithMocks.repoManager()
 
     # Setup fake file system
     fsState = {
@@ -120,7 +120,7 @@ def test_gallery_forward_button_click(containerWithMocks: Container, qtbot: QtBo
             "03:03:45.522668_Shrek Eat Chips11": ["1.png"],
         }
     }
-    populate_fs_with(fs, TEST_RESOURCES_FOLDER_PATH/"testRepo", fsState)
+    populate_fs_with(fs, repoManager.current_repo_abs_path(), fsState)
 
     gallery = containerWithMocks.gallery()
     qtbot.addWidget(gallery)

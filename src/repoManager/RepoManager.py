@@ -91,8 +91,12 @@ class RepoManager(object):
         self.switch_repo(startingRepo)
 
 
-    def current_repo(self):
+    def current_repo(self) -> str:
         return self.imageRepo.name
+
+
+    def current_repo_abs_path(self) -> Path:
+        return self.reposPath/self.current_repo()
 
 
     def switch_repo(self, newRepo: str):
@@ -109,8 +113,6 @@ class RepoManager(object):
         """
         self.imageRepo: Path = self.reposPath/newRepo
         os.makedirs(self.imageRepo, exist_ok=True)
-        logging.debug(msg=f"Repo Manager set to path {self.reposPath/newRepo}")
-        logging.debug(msg=f"Repo Manager set to path {os.listdir(self.reposPath/newRepo)}")
 
 
     def generate_image_prompt_directory(self, prompt: str) -> [ImagePromptDirectory, str]:

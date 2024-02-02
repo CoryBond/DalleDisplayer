@@ -11,9 +11,6 @@ from pytestqt.qtbot import QtBot
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 
-from dependencyInjection.containerTestUtil import override_with_mock_image_provider
-
-from constantsTestUtil import TEST_RESOURCES_FOLDER_PATH
 from repoManager.test_DirectoryIterator import populate_fs_with
 
 from pyfakefs.fake_filesystem import FakeFilesystem 
@@ -29,8 +26,9 @@ def test_home_page_loads_with_default_state(containerWithMocks: Container, qtbot
 
    # Arrange
    # Setup fake file system
+   repoConfiguredPath = containerWithMocks.repoManager().current_repo_abs_path()
    fsState = {}
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_PATH/"testRepo", fsState)
+   populate_fs_with(fs, repoConfiguredPath, fsState)
 
    # Act
    containerWithMocks.uiOrchestrator().start_with_bot(qtbot)
@@ -54,8 +52,9 @@ def test_home_page_image_generation_refreshes_gallery(containerWithMocks: Contai
    # Arrange
 
    # Setup fake file system
+   repoConfiguredPath = containerWithMocks.repoManager().current_repo_abs_path()
    fsState = {}
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_PATH/"testRepo", fsState)
+   populate_fs_with(fs, repoConfiguredPath, fsState)
    containerWithMocks.uiOrchestrator().start_with_bot(qtbot)
 
    mainWindow = containerWithMocks.mainWindow()
