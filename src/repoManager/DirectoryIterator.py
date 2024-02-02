@@ -94,7 +94,7 @@ class DirectoryIterator:
             self.pathToDirectories is not None and
             self.currentDate is not None
            ):
-            logging.error(f'self.currentTimePrompt {self.currentTimePrompt}')
+            logging.info(f'Time Prompt Directory Found')
             time, prompt = self.currentTimePrompt.split("_")
             return ImagePromptDirectory(
                 prompt=prompt,
@@ -107,22 +107,27 @@ class DirectoryIterator:
 
 
     def _iterate_time_prompt(self, direction: DIRECTION = DIRECTION.FORWARD) -> ImagePromptDirectory:
+        logging.debug(f'Iterating To Next Time Prompt')
         # attempt to get next time prompt within current date directory
         nextTimePromptIndex = get_next_file_index_from_reverse_sorted(fileName=self.currentTimePrompt, reverseSortedFiles=self.currentTimePromptDirectories, direction=direction)
         if(nextTimePromptIndex is not None):
             nextTimePrompt = self.currentTimePromptDirectories[nextTimePromptIndex]
+            logging.debug(f'Looking at timeprompt {nextTimePrompt}')
             self.currentTimePrompt = nextTimePrompt
             return self.get_current_image_prompt_directory()
+        logging.debug(f'TimePrompts exhuasted under date')
         self.currentTimePrompt = None   
         return None
 
 
     def _iterate_date(self, direction: DIRECTION = DIRECTION.FORWARD) -> ImagePromptDirectory:
+        logging.debug(f'Iterating To Next Date')
         # attempt to get next time prompt within current date directory
         nextDateIndex = get_next_file_index_from_reverse_sorted(fileName=self.currentDate, reverseSortedFiles=self.sortedDateDirectories, direction=direction)
 
         if(nextDateIndex is not None):
             nextDate = self.sortedDateDirectories[nextDateIndex]
+            logging.debug(f'Looking at date {nextDate}')
             nextTimePromptDirectories = get_reverse_sorted_directory_by_name(self.pathToDirectories/nextDate)
 
             startIndexOfNextDateFolder = 0 if direction is not DIRECTION.BACKWARD else len(nextTimePromptDirectories)-1
@@ -132,6 +137,7 @@ class DirectoryIterator:
             self.currentTimePromptDirectories = nextTimePromptDirectories
             self.currentTimePrompt = nextTimePrompt   
             return self.get_current_image_prompt_directory()
+        logging.debug(f'Dates exhausted')
         self.currentDate = None
         self.currentTimePromptDirectories = None
         self.currentTimePrompt = None   
@@ -160,7 +166,7 @@ class DirectoryIterator:
             directories for a given date.
 
         """
-        logging.debug(f'Getting next prompt with direction {direction}')
+        logging.debug(msg=f'Getting next prompt with direction {direction}')
         self._rewind_if_necessary(direction=direction)
 
         # get next time prompt if current date direcotry has any

@@ -109,6 +109,8 @@ class RepoManager(object):
         """
         self.imageRepo: Path = self.reposPath/newRepo
         os.makedirs(self.imageRepo, exist_ok=True)
+        logging.debug(msg=f"Repo Manager set to path {self.reposPath/newRepo}")
+        logging.debug(msg=f"Repo Manager set to path {os.listdir(self.reposPath/newRepo)}")
 
 
     def generate_image_prompt_directory(self, prompt: str) -> [ImagePromptDirectory, str]:
@@ -247,7 +249,7 @@ class RepoManager(object):
 
 
     def _get_images(self, number: int, startingDirectory: ImagePromptDirectory = None, direction: DIRECTION = DIRECTION.FORWARD) -> GetImagePrompsResult:
-        logging.info("Getting images")
+        logging.info(msg="Getting images")
         if(number < 1):
             return GetImagePrompsResult(results=[], errorMessage="Number must be greater then 0")
 
