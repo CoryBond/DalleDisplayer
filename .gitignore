@@ -2,7 +2,7 @@ share
 lib
 include
 bin
-*.log
+resources/logs/*
 resources/imageRepos
 testResources/imageRepos
 myenv

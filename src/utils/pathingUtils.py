@@ -1,17 +1,10 @@
-from enum import Enum
 from pathlib import Path
 import os
 from typing import List
-
-from utils.algoUtils import reverse_bisect_left, reverse_bisect_right
+from utils.enums import DIRECTION
 
 
 RESOURCES_FOLDER = 'resources'
-
-
-class DIRECTION(Enum):
-    FORWARD = "forward"
-    BACKWARD = "backward"
 
 
 def get_project_root() -> Path:
@@ -96,40 +89,3 @@ def get_reverse_sorted_directory_by_name(directory: Path) -> List[str]:
     Same as get_sorted_directory_by_name but in reverse order.
     """
     return get_sorted_directory_by_name(directory, reverse=True)
-
-
-def get_next_file_index_from_reverse_sorted(fileName: str, reverseSortedFiles: List[str], direction: DIRECTION = DIRECTION.FORWARD) -> int:
-    """
-    Util function that gets the next logical index of a given file in a sorted file list. If the provided file has no "next" entry
-    then None is retruned instead
-    
-
-    The performance of this function should be Olog(s = size of reverseSortedFiles) for getting the next index.
-
-    NOTE: Maybe worth converting this to a more generic "algo" util function and drop the file aestestics surronding it.
-          This function could be used in othere scenarios that aren't related to files but sorted string lists in general.
-
-    Parameters
-    ----------
-    fileName: (str):
-        The file name to search the sorted files in.
-
-    reverseSortedFiles: (list):
-        The files to search the files next index in.
-        The provided list of files must be sorted IN REVERSE order for this function to work properly.
-
-    Returns
-    -------
-    int
-        A number if there exists a next logical entry for the provided file or None if not
-    """
-    if(reverseSortedFiles is not None and len(reverseSortedFiles) > 0):
-        if(direction is not DIRECTION.BACKWARD):
-            nextIndex = reverse_bisect_right(reverseSortedFiles, fileName)
-            if(nextIndex < len(reverseSortedFiles)):
-                return nextIndex
-        else:
-            nextIndex = reverse_bisect_left(reverseSortedFiles, fileName)
-            if(nextIndex != 0):
-                return nextIndex - 1
-    return None

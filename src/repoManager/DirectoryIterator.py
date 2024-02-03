@@ -5,7 +5,9 @@ from typing import Union, List
 from repoManager.Models import ImagePromptDirectory
 from repoManager.utils import generate_file_name, extract_file_name
 
-from utils.pathingUtils import get_reverse_sorted_directory_by_name, get_next_file_index_from_reverse_sorted, DIRECTION
+from utils.pathingUtils import get_reverse_sorted_directory_by_name
+from utils.algoUtils import get_next_string_index_from_reverse_sorted
+from utils.enums import DIRECTION
 
 
 def get_start_index(direction: DIRECTION, collection: List):
@@ -115,7 +117,7 @@ class DirectoryIterator:
         # 2. Find next index from current time prompt
         nextTimePromptIndex = None
         if(self.timePromptIndex is None):
-            nextTimePromptIndex = get_next_file_index_from_reverse_sorted(fileName=self.currentTimePrompt, reverseSortedFiles=self.currentTimePromptDirectories, direction=self.direction)
+            nextTimePromptIndex = get_next_string_index_from_reverse_sorted(theString=self.currentTimePrompt, reverseSortedStrings=self.currentTimePromptDirectories, direction=self.direction)
         elif (self.direction is DIRECTION.FORWARD and self.timePromptIndex < len(self.currentTimePromptDirectories)-1):
             nextTimePromptIndex = self.timePromptIndex + 1 
         elif (self.direction is DIRECTION.BACKWARD and self.timePromptIndex > 0):
@@ -141,7 +143,7 @@ class DirectoryIterator:
         # 2. Find next index from current date
         nextDateIndex = None
         if(self.dateIndex is None):
-            nextDateIndex =  get_next_file_index_from_reverse_sorted(fileName=self.currentDate, reverseSortedFiles=self.sortedDateDirectories, direction=self.direction)
+            nextDateIndex =  get_next_string_index_from_reverse_sorted(theString=self.currentDate, reverseSortedStrings=self.sortedDateDirectories, direction=self.direction)
         elif (self.direction is DIRECTION.FORWARD and self.dateIndex < len(self.sortedDateDirectories)-1):
             nextDateIndex = self.dateIndex + 1
         elif (self.direction is DIRECTION.BACKWARD and self.dateIndex > 0):

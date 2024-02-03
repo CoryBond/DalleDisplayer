@@ -1,6 +1,7 @@
 
 
 import logging
+from logging.handlers import RotatingFileHandler
 
 from utils.pathingUtils import get_or_create_log_directory
 
@@ -14,4 +15,5 @@ def configureBasicLogger(filename='aiImageDisplayer.log', level=logging.INFO):
 
     TODO: Currently does not support rotating or cleaning old logs.
     """
-    logging.basicConfig(filename=get_or_create_log_directory()/filename, encoding='utf-8', format=FORMAT, level=level)    
+    handlers = [RotatingFileHandler(filename=get_or_create_log_directory()/filename, maxBytes=100000, backupCount=3)]
+    logging.basicConfig(encoding='utf-8', format=FORMAT, level=level, handlers=handlers)    

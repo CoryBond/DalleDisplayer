@@ -6,6 +6,7 @@ from unittest.mock import Mock
 
 from ui.QApplicationManager import QApplicationManager
 
+
 @pytest.fixture
 def mockQApplicationManager(qapp):
    mock = Mock(spec=QApplicationManager)

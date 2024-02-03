@@ -9,7 +9,9 @@ from repoManager.Models import ImagePrompResult, NextToken, ImagePromptDirectory
 from repoManager.utils import generate_file_name, generate_image_prompt_path
 from utils.dateUtils import generate_ios_date_time_strs
 
-from utils.pathingUtils import DIRECTION, read_file_as_bytes
+from utils.pathingUtils import read_file_as_bytes
+from utils.enums import DIRECTION
+
 from PIL import Image
 
 

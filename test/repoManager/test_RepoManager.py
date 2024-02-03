@@ -1,6 +1,6 @@
 
 import io
-from utils.pathingUtils import DIRECTION
+from utils.enums import DIRECTION
 
 from PIL import Image
 

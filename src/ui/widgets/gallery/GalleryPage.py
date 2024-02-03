@@ -7,9 +7,10 @@ from repoManager.Models import NextToken
 from ui.dialogs.ErrorMessage import ErrorMessage
 from ui.widgets.home.ImageMeta import ImageMetaInfo
 
-from repoManager.RepoManager import DIRECTION, RepoManager
+from repoManager.RepoManager import RepoManager
 from ui.widgets.gallery.GalleryDisplay import GalleryDisplay
 from utils.qtUtils import clear_layout
+from utils.enums import DIRECTION
 
 
 def generateWiderButton(text: str, callback: Callable = None) -> QPushButton:
