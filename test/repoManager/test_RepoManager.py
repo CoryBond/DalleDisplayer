@@ -1,5 +1,5 @@
 
-from pathlib import Path
+import io
 from utils.pathingUtils import DIRECTION
 
 from PIL import Image
@@ -60,8 +60,8 @@ def test_images_exist_get_images(containerWithMocks: Container, fs: FakeFilesyst
    assert onlyResult.repo == "testRepo"
    assert onlyResult.date == "2024-01-14"
    assert onlyResult.time == "03:03:45.522668"
-   Image.open(onlyResult.images[0]) # if no exception is thrown then the bytes are a proper image
-
+   with Image.open(io.BytesIO(onlyResult.images[0])): # if no exception is thrown then the bytes are a proper image
+      assert True
 
 
 def test_lots_of_images_exist_get_images(containerWithMocks: Container, fs: FakeFilesystem):
@@ -98,13 +98,15 @@ def test_lots_of_images_exist_get_images(containerWithMocks: Container, fs: Fake
    assert resultOne.repo == "testRepo"
    assert resultOne.date == "2024-01-14"
    assert resultOne.time == "03:03:45.522668"
-   Image.open(resultOne.images[0]) # if no exception is thrown then the bytes are a proper image
+   with Image.open(io.BytesIO(resultOne.images[0])): # if no exception is thrown then the bytes are a proper image
+      assert True
 
    assert resultTwo.prompt == "Donkey Eat Chips"
    assert resultTwo.repo == "testRepo"
    assert resultTwo.date == "2024-01-14"
    assert resultTwo.time == "01:03:45.522668"
-   Image.open(resultTwo.images[0]) # if no exception is thrown then the bytes are a proper image
+   with Image.open(io.BytesIO(resultTwo.images[0])): # if no exception is thrown then the bytes are a proper image
+      assert True
 
 
 def test_pagination(containerWithMocks: Container, fs: FakeFilesystem):
@@ -142,7 +144,8 @@ def test_pagination(containerWithMocks: Container, fs: FakeFilesystem):
    assert resultOne.repo == "testRepo"
    assert resultOne.date == "2024-01-13"
    assert resultOne.time == "03:03:45.522668"
-   Image.open(resultOne.images[0]) # if no exception is thrown then the bytes are a proper image
+   with Image.open(io.BytesIO(resultOne.images[0])): # if no exception is thrown then the bytes are a proper image
+      assert True
 
 
 def test_backwards_pagination_normal(containerWithMocks: Container, fs: FakeFilesystem):
@@ -176,13 +179,15 @@ def test_backwards_pagination_normal(containerWithMocks: Container, fs: FakeFile
    assert resultOne.repo == "testRepo"
    assert resultOne.date == "2024-01-14"
    assert resultOne.time == "03:03:45.522668"
-   Image.open(resultOne.images[0]) # if no exception is thrown then the bytes are a proper image
+   with Image.open(io.BytesIO(resultOne.images[0])): # if no exception is thrown then the bytes are a proper image
+      assert True
 
    assert resultTwo.prompt == "Donkey Eat Chips"
    assert resultTwo.repo == "testRepo"
    assert resultTwo.date == "2024-01-14"
    assert resultTwo.time == "01:03:45.522668"
-   Image.open(resultTwo.images[0]) # if no exception is thrown then the bytes are a proper image
+   with Image.open(io.BytesIO(resultTwo.images[0])): # if no exception is thrown then the bytes are a proper image
+      assert True
 
 
 def test_backwards_pagination_multi(containerWithMocks: Container, fs: FakeFilesystem):
@@ -221,13 +226,15 @@ def test_backwards_pagination_multi(containerWithMocks: Container, fs: FakeFiles
    assert resultOne.repo == "testRepo"
    assert resultOne.date == "2024-01-13"
    assert resultOne.time == "03:03:45.522668"
-   Image.open(resultOne.images[0]) # if no exception is thrown then the bytes are a proper image
+   with Image.open(io.BytesIO(resultOne.images[0])): # if no exception is thrown then the bytes are a proper image
+      assert True
 
    assert resultTwo.prompt == "Puss Eat Chips"
    assert resultTwo.repo == "testRepo"
    assert resultTwo.date == "2024-01-13"
    assert resultTwo.time == "02:03:45.522668"
-   Image.open(resultTwo.images[0]) # if no exception is thrown then the bytes are a proper image
+   with Image.open(io.BytesIO(resultTwo.images[0])): # if no exception is thrown then the bytes are a proper image
+      assert True
 
    assert len(result2.results) == 2
    assert result2.nextToken is None
@@ -238,10 +245,12 @@ def test_backwards_pagination_multi(containerWithMocks: Container, fs: FakeFiles
    assert resultOne.repo == "testRepo"
    assert resultOne.date == "2024-01-14"
    assert resultOne.time == "03:03:45.522668"
-   Image.open(resultOne.images[0]) # if no exception is thrown then the bytes are a proper image
+   with Image.open(io.BytesIO(resultOne.images[0])): # if no exception is thrown then the bytes are a proper image
+      assert True
 
    assert resultTwo.prompt == "Donkey Eat Chips"
    assert resultTwo.repo == "testRepo"
    assert resultTwo.date == "2024-01-14"
    assert resultTwo.time == "01:03:45.522668"
-   Image.open(resultTwo.images[0]) # if no exception is thrown then the bytes are a proper image
+   with Image.open(io.BytesIO(resultTwo.images[0])): # if no exception is thrown then the bytes are a proper image
+      assert True
