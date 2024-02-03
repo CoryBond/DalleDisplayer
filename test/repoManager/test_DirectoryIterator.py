@@ -7,7 +7,8 @@ import pytest
 from repoManager.DirectoryIterator import DirectoryIterator
 from repoManager.Models import ImagePromptDirectory
 
-from utils.pathingUtils import DIRECTION, get_project_root
+from utils.pathingUtils import get_project_root
+from utils.enums import DIRECTION
 
 from pyfakefs.fake_filesystem import FakeFilesystem 
 
