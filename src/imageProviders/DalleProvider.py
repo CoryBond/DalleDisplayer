@@ -12,15 +12,19 @@ ENGINE_NAME = "Dall-e"
 
 class DalleProvider(ImageProvider):
     """
-    A superclass used to wrap APIs for web operations.
+    Wrapper for calling the Dalle-3 API and getting images (as bytes from it).
+
+    This is a waiting call so it should be threaded.
 
     Attributes
     ----------
+    key(str)
+        the API key. See : https://openai.com/blog/dall-e-api-now-available-in-public-beta
 
     Methods
     -------
     get_image_from_string(prompt)
-        Retrieves image from API. Returns PIL Image object. Returns 'None' object on failure
+        Retrieves image from API. Image as bytes. Returns 'None' on failure
     """
 
     # inherits from Provider

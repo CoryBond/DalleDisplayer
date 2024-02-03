@@ -235,22 +235,17 @@ class RepoManager(object):
         errorMessage = None
 
         try:
-            directoryIterator = DirectoryIterator(pathToDirectories=self.imageRepo, startingDirectory=startingDirectory, direction=direction)
-
             # If going backwards add the current directory but only if it actually exists. Otherwise continue iterating from the start directory.
             if(direction is DIRECTION.BACKWARD and self._directory_exists(startingDirectory)):
                 imagePromptResults.append(self._get_files(directory=startingDirectory))
 
-            # Iterate prompt directories until either we found enough prompt directories to match the number requested or until there are none left in the direction we are iterating
-            for _ in range(len(imagePromptResults), number):
-                # if going backwards the token provided will be within the next page. As such include it. There are also scenarios (first initialization) where a caller needs to force include a forward direciton call too
-                nextTimeWithPromptDirectory = next(directoryIterator)
+            directoryIterator = DirectoryIterator(pathToDirectories=self.imageRepo, startingDirectory=startingDirectory, direction=direction)
 
-                # if 
-                if(nextTimeWithPromptDirectory is not None):
-                    imagePromptResults.append(self._get_files(directory=nextTimeWithPromptDirectory))
-                else:
-                    break
+            # Iterate prompt directories until either we found enough prompt directories to match the number requested or until there are none left in the direction we are iterating
+            # Utilize assignment expressions to use an iterator in a while loop with other short circuit conditions. Should be safe since "None" is effectively exhausting the iterator in this case anyways
+            # See : https://stackoverflow.com/questions/59092561/how-to-use-iterator-in-while-loop-statement-in-python
+            while (len(imagePromptResults) < number) and (nextTimeWithPromptDirectory := next(directoryIterator, None)):
+                imagePromptResults.append(self._get_files(directory=nextTimeWithPromptDirectory))
 
         except BaseException as e:
             logging.error(traceback.format_exc())
@@ -260,9 +255,9 @@ class RepoManager(object):
             # Order the page worth of data as though the direction was forward rather then backward
             if direction is DIRECTION.BACKWARD:
                 imagePromptResults.reverse()
-                nextToken= generate_nextToken(next(directoryIterator))
-            else:
-                nextToken = generate_nextToken(directoryIterator.get_current_image_prompt_directory())
+                nextToken= generate_nextToken(next(directoryIterator, None))
+            elif len(imagePromptResults) >= number : # Add next token IF we have a full page going forward
+                nextToken = generate_nextToken(imagePromptResults[-1])
 
             return GetImagePrompsResult(
                 imagePromptResults, 

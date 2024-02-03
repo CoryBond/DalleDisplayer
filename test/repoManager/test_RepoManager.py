@@ -6,9 +6,6 @@ from PIL import Image
 
 from depdencyInjection.Container import Container
 from repoManager.RepoManager import RepoManager
-from repoManager.test_DirectoryIterator import populate_fs_with
-
-from pyfakefs.fake_filesystem import FakeFilesystem 
 
 
 def test_empty_fs_get_images(containerWithMocks: Container):
@@ -30,7 +27,7 @@ def test_empty_fs_get_images(containerWithMocks: Container):
    assert result.errorMessage is None, "result.errorMessage"
 
 
-def test_images_exist_get_images(containerWithMocks: Container, fs: FakeFilesystem):
+def test_images_exist_get_images(containerWithMocks: Container, fshelpers):
    """
    Given single prompt entry
    When get_images for more then that called
@@ -45,7 +42,7 @@ def test_images_exist_get_images(containerWithMocks: Container, fs: FakeFilesyst
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, repoManager.current_repo_abs_path(), fsState)
+   fshelpers.populate_fs_with(repoManager.current_repo_abs_path(), fsState)
 
    # Act
    result = repoManager.get_images(2)
@@ -64,7 +61,7 @@ def test_images_exist_get_images(containerWithMocks: Container, fs: FakeFilesyst
       assert True
 
 
-def test_lots_of_images_exist_get_images(containerWithMocks: Container, fs: FakeFilesystem):
+def test_lots_of_images_exist_get_images(containerWithMocks: Container, fshelpers):
    """
    Given lots of prompt entries
    When get_images for less then that called
@@ -83,7 +80,7 @@ def test_lots_of_images_exist_get_images(containerWithMocks: Container, fs: Fake
          "03:03:45.522668_Fiona Eat Chips": ["1.png"],
       }
    }
-   populate_fs_with(fs, repoManager.current_repo_abs_path(), fsState)
+   fshelpers.populate_fs_with(repoManager.current_repo_abs_path(), fsState)
 
    # Act
    result = repoManager.get_images(2)
@@ -109,7 +106,7 @@ def test_lots_of_images_exist_get_images(containerWithMocks: Container, fs: Fake
       assert True
 
 
-def test_pagination(containerWithMocks: Container, fs: FakeFilesystem):
+def test_pagination(containerWithMocks: Container, fshelpers):
    """
    Given lots of prompt entries
    When subsequent calls to get_images with token provided
@@ -128,7 +125,7 @@ def test_pagination(containerWithMocks: Container, fs: FakeFilesystem):
          "03:03:45.522668_Fiona Eat Chips": ["1.png"],
       }
    }
-   populate_fs_with(fs, repoManager.current_repo_abs_path(), fsState)
+   fshelpers.populate_fs_with(repoManager.current_repo_abs_path(), fsState)
 
    # Act
    init_result = repoManager.get_images(2)
@@ -148,7 +145,7 @@ def test_pagination(containerWithMocks: Container, fs: FakeFilesystem):
       assert True
 
 
-def test_backwards_pagination_normal(containerWithMocks: Container, fs: FakeFilesystem):
+def test_backwards_pagination_normal(containerWithMocks: Container, fshelpers):
    """
    Given lots of prompt entries
    When subsequent calls to get_images with token provided (and backwards)
@@ -167,7 +164,7 @@ def test_backwards_pagination_normal(containerWithMocks: Container, fs: FakeFile
          "03:03:45.522668_Fiona Eat Chips": ["1.png"],
       }
    }
-   populate_fs_with(fs, repoManager.current_repo_abs_path(), fsState)
+   fshelpers.populate_fs_with(repoManager.current_repo_abs_path(), fsState)
 
    # Act
    init_result = repoManager.get_images(2)
@@ -190,7 +187,7 @@ def test_backwards_pagination_normal(containerWithMocks: Container, fs: FakeFile
       assert True
 
 
-def test_backwards_pagination_multi(containerWithMocks: Container, fs: FakeFilesystem):
+def test_backwards_pagination_multi(containerWithMocks: Container, fshelpers):
    """
    Given lots of prompt entries
    When many subsequent calls to get_images with token provided (and backwards)
@@ -211,7 +208,7 @@ def test_backwards_pagination_multi(containerWithMocks: Container, fs: FakeFiles
          "01:03:45.522668_Farquaad Eat Chips": ["1.png"],
       }
    }
-   populate_fs_with(fs, repoManager.current_repo_abs_path(), fsState)
+   fshelpers.populate_fs_with(repoManager.current_repo_abs_path(), fsState)
 
    # Act
    init_result = repoManager.get_images(4)

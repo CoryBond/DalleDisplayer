@@ -20,7 +20,7 @@ def get_before_start_index(direction: DIRECTION, collection: List):
 
 class DirectoryIterator:
     """
-    An iterator that simplifies traversal of the file system. Its primary mode of traversal is going to the logical "next"
+    An iterator that simplifies traversal of the file system for an image repo. Its primary mode of traversal is going to the logical "next"
     prompt directory in the system.
 
     When created the DirectoryIterator first makes a snapshot of the date directories and orders them by most recent. This snapshot
@@ -41,14 +41,12 @@ class DirectoryIterator:
     Within each timePrompt directory the images generated for that prompt are stored.
 
     When saved to the file system the actual directories won't be sorted, as they are actual stored by order of the file
-    systems hash system. For optimization purposes that is why a "snapshot" of the dates is used to reduce having to
-    sort all dates when loading them from the file system.
+    systems hash. For optimization purposes that is why a "snapshot" of the dates are used to reduce re-sorting all dates 
+    for every next call.
 
-    The DirectoryIterator has internal pionters to where it is in the directory structure. These pointers start
-    at the very first entry in the directory structure depending on the direction provided (default of Forward.) These 
-    pointers can be adjusted with a provided startingDirectory arg. The startingDirectory does not need to be physical
-    directory in the system aand this DirectoryIterator will iterate to the next logical entry of the provided starting directory
-    if that is the case.
+    The DirectoryIterator has internal pointers to where it is in the directory structure. These pointers can be adjusted with a 
+    provided startingDirectory arg. The startingDirectory does not need to be physical directory in the system and this 
+    DirectoryIterator will iterate to the next logical entry from the provided starting directory.
     
     """
     def __init__(self, pathToDirectories: Union[str, Path], startingDirectory: ImagePromptDirectory = None, direction: DIRECTION = DIRECTION.FORWARD):
@@ -178,8 +176,7 @@ class DirectoryIterator:
 
     def __next__(self) -> ImagePromptDirectory:
         """
-        Gets the logical next image prompt that this iterator from the current image prompt this iterator is
-        pointing to. It could also return None if all image prompts have been exhuasted.
+        Gets the next logical image prompt from previous iterations on this iterator.
 
         Not garanteed to be 100% accurate in scenarios where the physical file system has been externally
         modified.
@@ -198,6 +195,9 @@ class DirectoryIterator:
             directories for a given date.
 
         """
+        if(self._exhuasted_all_dates()):
+            raise StopIteration
+        
         logging.debug(msg=f'Getting next prompt with direction {self.direction}')
 
         # get next time prompt if current date direcotry has any
@@ -206,5 +206,8 @@ class DirectoryIterator:
         # Iterate through date directories until a time prompt directory is found or all date directories are exhuasted
         while(candidate_time_prompt_directory is None and not self._exhuasted_all_dates()):
             candidate_time_prompt_directory = self._iterate_date()
+
+        if(self._exhuasted_all_dates()):
+            raise StopIteration
         
         return candidate_time_prompt_directory 
