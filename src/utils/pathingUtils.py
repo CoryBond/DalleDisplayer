@@ -55,6 +55,15 @@ def get_or_create_image_resources(resourcesFolder: str = RESOURCES_FOLDER) -> Pa
     return image_resources_path
     
 
+def read_file_as_bytes(file_path: Path) -> bytes:
+    """
+    Takes a files path and reads it as bytes
+    """
+    with open(file_path, 'rb') as file:
+        file_bytes = file.read()
+    return file_bytes
+
+
 def get_sorted_directory_by_name(path: Path, reverse: bool) -> List[str]:
     """
     Gets all directories and files from the file system from the proivded directory path in sorted order.

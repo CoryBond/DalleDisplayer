@@ -104,7 +104,7 @@ class HomePage(QSplitter):
             saveResult = self.repoManager.save_image(prompt, response['img'])
             self.saveImageSignal.emit()
 
-            self.imageViewer.replace_image(saveResult.images[0].as_posix())
+            self.imageViewer.replace_image(saveResult.images[0])
             self.imageMeta.loadMetaSignal.emit(ImageMetaInfo(
                 prompt= prompt,
                 date= saveResult.date,
@@ -117,8 +117,8 @@ class HomePage(QSplitter):
         self.imageGenerator.toggle_disabled_prompting(False)
 
 
-    def load_image_response(self, metaInfo: ImageMetaInfo, imageBytes):        
-        self.imageViewer.replace_image(imageBytes)
+    def load_image_response(self, metaInfo: ImageMetaInfo, image):        
+        self.imageViewer.replace_image(image)
         self.imageMeta.loadMetaSignal.emit(metaInfo)
 
 

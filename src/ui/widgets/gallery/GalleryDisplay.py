@@ -1,10 +1,8 @@
 
-from io import BytesIO
 import logging
-from pathlib import Path
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QScrollArea
-from PyQt5.QtCore import pyqtSignal, Qt, QByteArray
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QPixmap
 
 from typing import List
 
@@ -14,7 +12,7 @@ from ui.widgets.home.ImageMeta import ImageMetaInfo
 
 
 class ImagesDisplay(QWidget):
-    imageClickedSignal =  pyqtSignal(ImageMetaInfo, QImage)
+    imageClickedSignal =  pyqtSignal(ImageMetaInfo, bytes)
 
     def __init__(self, imageResult: ImagePrompResult):
         super().__init__()
@@ -31,8 +29,9 @@ class ImagesDisplay(QWidget):
 
         layout.addWidget(QHLine())
 
-        self.image_label = self.create_image(imageResult, imageResult.images[0])
-        layout.addWidget(self.image_label)
+        for image in imageResult.images:
+            self.image_label = self.create_image(imageResult, image)
+            layout.addWidget(self.image_label)
 
         self.setLayout(layout)
         self.image_meta = imageResult
@@ -56,9 +55,9 @@ class ImagesDisplay(QWidget):
         return headerLayout
     
 
-    def create_image(self, imageResult: ImagePrompResult, imageBytes: BytesIO) -> QLabel:
+    def create_image(self, imageResult: ImagePrompResult, imageBytes: bytes) -> QLabel:
         pixmap = QPixmap()
-        pixmap.loadFromData(imageBytes.read())
+        pixmap.loadFromData(imageBytes)
         label = QLabel()
         label.resize(75, 75)
         label.setPixmap(pixmap.scaled(label.size(), Qt.IgnoreAspectRatio))
@@ -68,14 +67,14 @@ class ImagesDisplay(QWidget):
                     ImageMetaInfo(
                         prompt=imageResult.prompt, date=imageResult.date, time=imageResult.time, engine=imageResult.repo, num="1"
                     ), 
-                    pixmap.toImage()
+                    imageBytes
                 )
         label.mousePressEvent = leftClickEvent
         return label
 
 
 class GalleryDisplay(QScrollArea):
-    imageClickedSignal = pyqtSignal(ImageMetaInfo, QImage)
+    imageClickedSignal = pyqtSignal(ImageMetaInfo, object)
 
 
     def __init__(self, images: List[ImagePrompResult] = []):

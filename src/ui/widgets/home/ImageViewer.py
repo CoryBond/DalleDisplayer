@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import QSplashScreen, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QPinchGesture, QGraphicsItem, QGestureEvent
-from PyQt5.QtCore import QRectF, QEvent, Qt, QByteArray
+import logging
+from PyQt5.QtWidgets import QSplashScreen, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QGraphicsItem, QGestureEvent
+from PyQt5.QtCore import QRectF, QEvent, Qt
 from PyQt5.QtGui import QPixmap, QTransform
-from io import BytesIO
 
 
 class ImageViewer(QGraphicsView):
@@ -24,12 +24,12 @@ class ImageViewer(QGraphicsView):
         Returns if the current view has any image loaded to it currently
     """
 
-    def __init__(self, startingImageBytes: BytesIO = None):
+    def __init__(self, startingImageBytes: bytes = None):
         super().__init__()
         self.init_ui(startingImageBytes)
 
 
-    def init_ui(self, startingImageBytes: BytesIO):
+    def init_ui(self, startingImageBytes: bytes):
 
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.grabGesture(Qt.PinchGesture)
@@ -39,12 +39,13 @@ class ImageViewer(QGraphicsView):
             self.replace_image(startingImageBytes)
         
     
-    def replace_image(self, imageBytes: BytesIO):
-        scene = QGraphicsScene(self)
+    def replace_image(self, image: bytes):
+        scene = QGraphicsScene(parent=self)
 
         # Add an image to the scene
         pixmap = QPixmap()
-        pixmap.loadFromData(imageBytes.read())
+        pixmap.loadFromData(image)
+
         splash = QSplashScreen(pixmap) 
         splash.show()
         self.pixmapItem = QGraphicsPixmapItem(pixmap)
@@ -93,6 +94,7 @@ class ImageViewer(QGraphicsView):
     # From https://stackoverflow.com/questions/35508711/how-to-enable-pan-and-zoom-in-a-qgraphicsview
     def fit_in_view_event(self, scale=True):
         rect = QRectF(self.pixmapItem.pixmap().rect())
+        logging.info("rect " + str(rect.height))
         if not rect.isNull():
             self.setSceneRect(rect)
             if self.has_photo():

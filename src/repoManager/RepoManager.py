@@ -3,15 +3,14 @@ import traceback
 import os
 from pathlib import Path
 from typing import Union, List
-from io import BytesIO
 from repoManager.DirectoryIterator import DirectoryIterator
 from repoManager.Models import ImagePrompResult, NextToken, ImagePromptDirectory, GetImagePrompsResult
 
 from repoManager.utils import generate_file_name, generate_image_prompt_path
 from utils.dateUtils import generate_ios_date_time_strs
-from PIL import Image
 
-from utils.pathingUtils import DIRECTION
+from utils.pathingUtils import DIRECTION, read_file_as_bytes
+from PIL import Image
 
 
 def generate_nextToken(directoryToTokenize: ImagePromptDirectory):
@@ -44,12 +43,6 @@ def generate_nextToken(directoryToTokenize: ImagePromptDirectory):
             time=directoryToTokenize.time
         )
     return nextToken
-
-
-def read_file_as_bytes(file_path: Path) -> BytesIO:
-    with open(file_path, 'rb') as file:
-        file_bytes = file.read()
-    return BytesIO(file_bytes)
 
 
 class RepoManager(object):
@@ -143,16 +136,16 @@ class RepoManager(object):
         logging.info(f"Attempting to load images from path {self.reposPath} and directory {directory}")
         fullPathToImagePromptFolder = self._generate_abs_image_prompt_path(directory)
 
-        imagesBytes = [read_file_as_bytes(fullPathToImagePromptFolder/img_file) for img_file in os.listdir(fullPathToImagePromptFolder)]
+        images = [read_file_as_bytes(fullPathToImagePromptFolder/img_file) for img_file in os.listdir(fullPathToImagePromptFolder)]
 
-        logging.info(f"Found {len(imagesBytes)} images")
+        logging.info(f"Found {len(images)} images")
         return ImagePrompResult(
             prompt=directory.prompt,
             repo=directory.repo,
             date=directory.date,
             time=directory.time,
             num="1",
-            images=imagesBytes
+            images=images
         )
 
 
@@ -276,7 +269,7 @@ class RepoManager(object):
             )
     
 
-    def save_image(self, prompt: str, image: Image) -> ImagePrompResult:
+    def save_image(self, prompt: str, imageBytes: bytes) -> ImagePrompResult:
         """
         Method to save images and their associated prompt to the file system. Images will be stored and indexed by the
         date and time in which they were saved. Additionally the image will be saved to whatever repo this repo manager
@@ -298,14 +291,15 @@ class RepoManager(object):
         directoryResult, absolutePath = self.generate_image_prompt_directory(prompt)
 
         try:
-            image.save(absolutePath/"1.png", "PNG")
-            logging.info(f'Saved {absolutePath/"1.png"}')
+            with Image.open(imageBytes) as image:
+                image.save(absolutePath/"1.png", "PNG") 
+                logging.info(f'Saved {absolutePath/"1.png"}')
         except BaseException as e:
             # In scenarios where the Pillow libraries encoder doesn't work 
             # (fake filesystem issues : https://github.com/pytest-dev/pyfakefs/discussions/858)
             # attempt to save the file via native os API
             with open(absolutePath/"1.png", 'wb') as f:
-                f.write(image.tobytes())
+                f.write(imageBytes)
                 logging.info(f'Saved {absolutePath/"1.png"}')
 
         return ImagePrompResult(
@@ -314,5 +308,5 @@ class RepoManager(object):
             date = directoryResult.date,
             time = directoryResult.time,
             num = 1,
-            images = [image.tobytes()]
+            images = [imageBytes]
         )

@@ -3,7 +3,6 @@ from pathlib import Path
 from utils.pathingUtils import DIRECTION
 
 from PIL import Image
-from io import BytesIO
 
 from depdencyInjection.Container import Container
 from repoManager.RepoManager import RepoManager

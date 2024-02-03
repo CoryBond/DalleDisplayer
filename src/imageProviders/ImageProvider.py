@@ -1,9 +1,8 @@
-from PIL import Image
 from typing import TypedDict
 
 
 ImageProviderResult = TypedDict('ImageProviderResult', {
-    'img': Image.Image,
+    'img': bytes,
     'errorMessage': str,
 })
 

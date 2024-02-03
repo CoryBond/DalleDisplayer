@@ -58,7 +58,7 @@ class DalleProvider(ImageProvider):
 
             url = response.data[0].url
             logging.info("Generated image at : " + url)
-            img = Image.open(BytesIO(requests.get(url).content))
+            img = requests.get(url).content
 
         except openai.APIConnectionError as e:
             logging.error(traceback.format_exc())  
