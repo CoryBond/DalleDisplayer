@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Union, List
 from repoManager.Models import ImagePromptDirectory
-from repoManager.utils import generate_file_name
+from repoManager.utils import generate_file_name, extract_file_name
 
 from utils.pathingUtils import get_reverse_sorted_directory_by_name, get_next_file_index_from_reverse_sorted, DIRECTION
 
@@ -93,7 +93,7 @@ class DirectoryIterator:
             self.pathToDirectories is not None and
             self.currentDate is not None
            ):
-            time, prompt = self.currentTimePrompt.split("_")
+            time, prompt = extract_file_name(self.currentTimePrompt) # split only the first instance!
             dir = ImagePromptDirectory(
                 prompt=prompt,
                 time=time,
