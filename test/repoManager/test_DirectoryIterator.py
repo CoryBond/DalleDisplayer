@@ -7,7 +7,7 @@ import pytest
 from repoManager.DirectoryIterator import DirectoryIterator
 from repoManager.Models import ImagePromptDirectory
 
-from utils.pathingUtils import DIRECTION
+from utils.pathingUtils import DIRECTION, get_project_root
 
 from pyfakefs.fake_filesystem import FakeFilesystem 
 
@@ -37,7 +37,8 @@ def populate_fs_with(fs: FakeFilesystem, path: Union[Path, str], dateDictStructu
       for timePrompt, images in timePrompts.items():
          fs.create_dir(directory_path=path/date/timePrompt)
          for image in images:
-            fs.create_file(path/date/timePrompt/image)
+            # Use a real image to simplify the test
+            fs.add_real_file(source_path=get_project_root()/'..'/'testResources'/'images'/'ai'/"test1.png", target_path=path/date/timePrompt/image)
 
 
 def test_exception_thrown_on_existant_directory(fs: FakeFilesystem):

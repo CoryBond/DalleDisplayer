@@ -1,8 +1,9 @@
 
+from io import BytesIO
 import logging
 from pathlib import Path
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QScrollArea
-from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtCore import pyqtSignal, Qt, QByteArray
 from PyQt5.QtGui import QPixmap, QImage
 
 from typing import List
@@ -15,48 +16,49 @@ from ui.widgets.home.ImageMeta import ImageMetaInfo
 class ImagesDisplay(QWidget):
     imageClickedSignal =  pyqtSignal(ImageMetaInfo, QImage)
 
-    def __init__(self, image: ImagePrompResult):
+    def __init__(self, imageResult: ImagePrompResult):
         super().__init__()
 
-        self.init_ui(image)
+        self.init_ui(imageResult)
 
 
-    def init_ui(self, image: ImagePrompResult):
+    def init_ui(self, imageResult: ImagePrompResult):
 
         layout = QVBoxLayout()
         layout.setSizeConstraint(QVBoxLayout.SetFixedSize)
 
-        layout.addLayout(self.create_header(image))
+        layout.addLayout(self.create_header(imageResult))
 
         layout.addWidget(QHLine())
 
-        self.image_label = self.create_image(image, image.pngPaths[0])
+        self.image_label = self.create_image(imageResult, imageResult.images[0])
         layout.addWidget(self.image_label)
 
         self.setLayout(layout)
-        self.image_meta = image
+        self.image_meta = imageResult
 
 
-    def create_header(self, image: ImagePrompResult) -> QVBoxLayout:
+    def create_header(self, imageResult: ImagePrompResult) -> QVBoxLayout:
         headerLayout = QVBoxLayout()
         headerLayout.setSizeConstraint(QVBoxLayout.SetFixedSize)
 
-        headerLayout.addWidget(QLabel(image.prompt))
+        headerLayout.addWidget(QLabel(imageResult.prompt))
 
         subInfoLayout = QHBoxLayout()
         subInfoLayout.setSizeConstraint(QVBoxLayout.SetFixedSize)
 
         subInfoLayout.addWidget(QLabel("Time:"))
-        subInfoLayout.addWidget(QLabel(image.time))
+        subInfoLayout.addWidget(QLabel(imageResult.time))
         subInfoLayout.addWidget(QLabel("Date:"))
-        subInfoLayout.addWidget(QLabel(image.date))
+        subInfoLayout.addWidget(QLabel(imageResult.date))
 
         headerLayout.addLayout(subInfoLayout)
         return headerLayout
     
 
-    def create_image(self, image: ImagePrompResult, imgPath: Path) -> QLabel:
-        pixmap = QPixmap(imgPath.as_posix())
+    def create_image(self, imageResult: ImagePrompResult, imageBytes: BytesIO) -> QLabel:
+        pixmap = QPixmap()
+        pixmap.loadFromData(imageBytes.read())
         label = QLabel()
         label.resize(75, 75)
         label.setPixmap(pixmap.scaled(label.size(), Qt.IgnoreAspectRatio))
@@ -64,7 +66,7 @@ class ImagesDisplay(QWidget):
             if event.button() == Qt.LeftButton:
                 self.imageClickedSignal.emit(
                     ImageMetaInfo(
-                        prompt=image.prompt, date=image.date, time=image.time, engine=image.repo, num="1"
+                        prompt=imageResult.prompt, date=imageResult.date, time=imageResult.time, engine=imageResult.repo, num="1"
                     ), 
                     pixmap.toImage()
                 )
@@ -94,13 +96,13 @@ class GalleryDisplay(QScrollArea):
         self.setWidget( self.contentWidget)
 
 
-    def create_scrollable_widget(self, images: List[ImagePrompResult]):
+    def create_scrollable_widget(self, imageResults: List[ImagePrompResult]):
         layout = QVBoxLayout()
 
-        logging.debug(f'Recieving {len(images)} images')
+        logging.debug(f'Recieving {len(imageResults)} images')
 
-        for image in images:
-            imageDisplay = ImagesDisplay(image)
+        for imageResult in imageResults:
+            imageDisplay = ImagesDisplay(imageResult)
             imageDisplay.imageClickedSignal.connect(self.imageClickedSignal.emit)
             layout.addWidget(imageDisplay)
 

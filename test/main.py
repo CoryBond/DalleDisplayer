@@ -8,7 +8,7 @@ sys.path.append(Path(__file__).parent.parent.as_posix()+"/src") # Add src direct
 print(sys.path)
 
 from depdencyInjection.Container import Container
-from dependencyInjection.containerTestUtil import override_with_mock_image_provider
+from conftest import override_with_mock_image_provider
 
 from imageProviders.DalleProvider import ENGINE_NAME
 

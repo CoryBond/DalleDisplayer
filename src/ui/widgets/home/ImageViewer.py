@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QSplashScreen, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QPinchGesture, QGraphicsItem, QGestureEvent
-from PyQt5.QtCore import QRectF, QEvent, Qt
+from PyQt5.QtCore import QRectF, QEvent, Qt, QByteArray
 from PyQt5.QtGui import QPixmap, QTransform
-from pathlib import Path
+from io import BytesIO
 
 
 class ImageViewer(QGraphicsView):
@@ -24,26 +24,27 @@ class ImageViewer(QGraphicsView):
         Returns if the current view has any image loaded to it currently
     """
 
-    def __init__(self, startingImage: Path = None):
+    def __init__(self, startingImageBytes: BytesIO = None):
         super().__init__()
-        self.init_ui(startingImage)
+        self.init_ui(startingImageBytes)
 
 
-    def init_ui(self, startingImage: Path):
+    def init_ui(self, startingImageBytes: BytesIO):
 
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.grabGesture(Qt.PinchGesture)
 
         # Create a graphics view and scene
-        if startingImage is not None:
-            self.replace_image(startingImage.as_posix())
+        if startingImageBytes is not None:
+            self.replace_image(startingImageBytes)
         
     
-    def replace_image(self, image):
+    def replace_image(self, imageBytes: BytesIO):
         scene = QGraphicsScene(self)
 
         # Add an image to the scene
-        pixmap = QPixmap(image)
+        pixmap = QPixmap()
+        pixmap.loadFromData(imageBytes.read())
         splash = QSplashScreen(pixmap) 
         splash.show()
         self.pixmapItem = QGraphicsPixmapItem(pixmap)
