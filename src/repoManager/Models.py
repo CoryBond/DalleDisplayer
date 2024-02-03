@@ -1,11 +1,11 @@
-from pathlib import Path
+from io import BytesIO
 from typing import List, Union
 from decorators.decorators import auto_str
 
 
 @auto_str
 class ImagePromptDirectory(object):
-    def __init__(self, prompt: str, repo: str, date: str, time: str, absPath: str = None):
+    def __init__(self, prompt: str, repo: str, date: str, time: str):
         self.prompt = prompt
         self.repo = repo
         self.date = date
@@ -23,13 +23,13 @@ class NextToken(object):
 
 @auto_str
 class ImagePrompResult(object):
-    def __init__(self, prompt: str, repo: str, date: str, time: str, num: int, pngPaths: List[Path]):
+    def __init__(self, prompt: str, repo: str, date: str, time: str, num: int, images: List[BytesIO]):
         self.prompt = prompt
         self.repo = repo
         self.date = date
         self.time = time
         self.num = num
-        self.pngPaths = pngPaths
+        self.images = images
 
 
 @auto_str

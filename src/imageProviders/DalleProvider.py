@@ -28,7 +28,7 @@ class DalleProvider(ImageProvider):
         super().__init__(key=key, keyname=key)
         self.openAiClient = openai.OpenAI(api_key=key)
         return
-    
+
 
     def engine_name(self):
         return ENGINE_NAME

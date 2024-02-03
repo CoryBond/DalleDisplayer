@@ -81,7 +81,7 @@ class HomePage(QSplitter):
     def init_ui(self, lastImageResult: ImagePrompResult, speechRecognizer : SpeechRecognizer):
         self.imageGenerator = ImageGenerator(createImageSignal = self.createImageSignal, speechRecognizer = speechRecognizer)
         self.addWidget(self.imageGenerator)
-        self.imageViewer = ImageViewer(lastImageResult.pngPaths[0] if lastImageResult is not None and len(lastImageResult.pngPaths) > 0 else None)
+        self.imageViewer = ImageViewer(lastImageResult.images[0] if lastImageResult is not None and len(lastImageResult.images) > 0 else None)
         self.addWidget(self.imageViewer)
         self.imageMeta = ImageMeta(ImageMetaInfo(
                 prompt= lastImageResult.prompt, 
@@ -104,7 +104,7 @@ class HomePage(QSplitter):
             saveResult = self.repoManager.save_image(prompt, response['img'])
             self.saveImageSignal.emit()
 
-            self.imageViewer.replace_image(saveResult.pngPaths[0].as_posix())
+            self.imageViewer.replace_image(saveResult.images[0].as_posix())
             self.imageMeta.loadMetaSignal.emit(ImageMetaInfo(
                 prompt= prompt,
                 date= saveResult.date,
@@ -117,8 +117,8 @@ class HomePage(QSplitter):
         self.imageGenerator.toggle_disabled_prompting(False)
 
 
-    def load_image_response(self, metaInfo: ImageMetaInfo, image):        
-        self.imageViewer.replace_image(image)
+    def load_image_response(self, metaInfo: ImageMetaInfo, imageBytes):        
+        self.imageViewer.replace_image(imageBytes)
         self.imageMeta.loadMetaSignal.emit(metaInfo)
 
 

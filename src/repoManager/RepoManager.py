@@ -3,10 +3,11 @@ import traceback
 import os
 from pathlib import Path
 from typing import Union, List
+from io import BytesIO
 from repoManager.DirectoryIterator import DirectoryIterator
 from repoManager.Models import ImagePrompResult, NextToken, ImagePromptDirectory, GetImagePrompsResult
 
-from repoManager.utils import generate_file_name
+from repoManager.utils import generate_file_name, generate_image_prompt_path
 from utils.dateUtils import generate_ios_date_time_strs
 from PIL import Image
 
@@ -45,23 +46,10 @@ def generate_nextToken(directoryToTokenize: ImagePromptDirectory):
     return nextToken
 
 
-def generate_image_prompt_path(directory: ImagePromptDirectory) -> Path:
-    """
-    Converts a directory model into a file system path
-
-    Parameters
-    ----------
-    directory (ImagePromptDirectory): 
-        Model representing the directory within the image repo.
-
-    Returns
-    -------
-    Path
-        Path representing the file system location the image prompt directory modelled.
-        Can be used to do filesystem operations on the directory.
-    
-    """
-    return Path(directory.repo)/directory.date/generate_file_name(directory.time, directory.prompt)
+def read_file_as_bytes(file_path: Path) -> BytesIO:
+    with open(file_path, 'rb') as file:
+        file_bytes = file.read()
+    return BytesIO(file_bytes)
 
 
 class RepoManager(object):
@@ -77,14 +65,8 @@ class RepoManager(object):
     cannot make the provided reposPath for any reason it will throw an exception.
 
     Accessing images supports pagination.
-
-    NOTE: Currently the "images" returned by this repo manager are actually paths to the image on the file system. Clients are expected to
-    access the file system if they want to actually get the images. This was a early design that simplified the implementation without
-    having to fluff with byte conversions in testing. The repo manager and its clients were never expected to be used outside the same 
-    filesystem. A better, less coupled design would have the Repo Manager return the actual images themselves (as bytes). Maybe a 
-    design improvement for future iterations.    
+    
     """
-
     def __init__(self, reposPath: Union[str, Path], startingRepo: str):
         self.reposPath = Path(reposPath)
         os.makedirs(self.reposPath, exist_ok=True)
@@ -152,7 +134,7 @@ class RepoManager(object):
         ]
 
 
-    def _generate_abs_image_prompt_path(self, directory: ImagePromptDirectory):
+    def _generate_abs_image_prompt_path(self, directory: ImagePromptDirectory) -> Path:
         directorySubPath = generate_image_prompt_path(directory)
         return self.reposPath/directorySubPath
 
@@ -161,17 +143,16 @@ class RepoManager(object):
         logging.info(f"Attempting to load images from path {self.reposPath} and directory {directory}")
         fullPathToImagePromptFolder = self._generate_abs_image_prompt_path(directory)
 
-        fullImagePaths = [fullPathToImagePromptFolder/img_file for img_file in os.listdir(fullPathToImagePromptFolder)]
+        imagesBytes = [read_file_as_bytes(fullPathToImagePromptFolder/img_file) for img_file in os.listdir(fullPathToImagePromptFolder)]
 
-        logging.info(f"Found {len(fullImagePaths)} images")
-        logging.debug(f"Found the images : {str(fullImagePaths)}")
+        logging.info(f"Found {len(imagesBytes)} images")
         return ImagePrompResult(
             prompt=directory.prompt,
             repo=directory.repo,
             date=directory.date,
             time=directory.time,
             num="1",
-            pngPaths=fullImagePaths
+            images=imagesBytes
         )
 
 
@@ -333,5 +314,5 @@ class RepoManager(object):
             date = directoryResult.date,
             time = directoryResult.time,
             num = 1,
-            pngPaths = [absolutePath/"1.png"]
+            images = [image.tobytes()]
         )
