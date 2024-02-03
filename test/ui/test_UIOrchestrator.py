@@ -11,13 +11,9 @@ from pytestqt.qtbot import QtBot
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 
-from repoManager.test_DirectoryIterator import populate_fs_with
-
-from pyfakefs.fake_filesystem import FakeFilesystem 
-
 
 @pytest.mark.timeout(10)
-def test_home_page_loads_with_default_state(containerWithMocks: Container, qtbot: QtBot, fs: FakeFilesystem):
+def test_home_page_loads_with_default_state(containerWithMocks: Container, qtbot: QtBot, fshelpers):
    """
    Given lots of prompt entries
    When many subsequent calls to get_images with token provided (and backwards)
@@ -28,7 +24,7 @@ def test_home_page_loads_with_default_state(containerWithMocks: Container, qtbot
    # Setup fake file system
    repoConfiguredPath = containerWithMocks.repoManager().current_repo_abs_path()
    fsState = {}
-   populate_fs_with(fs, repoConfiguredPath, fsState)
+   fshelpers.populate_fs_with(repoConfiguredPath, fsState)
 
    # Act
    containerWithMocks.uiOrchestrator().start_with_bot(qtbot)
@@ -42,7 +38,7 @@ def test_home_page_loads_with_default_state(containerWithMocks: Container, qtbot
 
 
 @pytest.mark.timeout(25)
-def test_home_page_image_generation_refreshes_gallery(containerWithMocks: Container, qtbot: QtBot, fs: FakeFilesystem):
+def test_home_page_image_generation_refreshes_gallery(containerWithMocks: Container, qtbot: QtBot, fshelpers):
    """
    Given lots of prompt entries
    When many subsequent calls to get_images with token provided (and backwards)
@@ -54,7 +50,7 @@ def test_home_page_image_generation_refreshes_gallery(containerWithMocks: Contai
    # Setup fake file system
    repoConfiguredPath = containerWithMocks.repoManager().current_repo_abs_path()
    fsState = {}
-   populate_fs_with(fs, repoConfiguredPath, fsState)
+   fshelpers.populate_fs_with(repoConfiguredPath, fsState)
    containerWithMocks.uiOrchestrator().start_with_bot(qtbot)
 
    mainWindow = containerWithMocks.mainWindow()

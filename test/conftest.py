@@ -1,7 +1,9 @@
 """
 Test config file for all tests
 """
+from typing import Union, Dict, List
 import pytest
+import os
 
 import time
 from pathlib import Path
@@ -38,6 +40,41 @@ def test_image_generator():
             img = TestFile1 if i % 2 == 0 else TestFile2
             return { 'img': img, 'errorMessage': None }
         return cb
+
+
+TimeWithPromptDictType = Dict[str, List[str]]
+DateDictType = Dict[str, TimeWithPromptDictType]
+
+
+class FSHelpers:
+    def __init__(self, fs: FakeFilesystem):
+        self.fs = fs
+
+    def populate_fs_with(self, path: Union[Path, str], dateDictStructure : DateDictType):
+        """
+        Simulates a files and folders in a fake file system when accessing the images repo.
+
+        Will populate the fake file system with:
+
+        * Dates folder
+        * The TimePrompts of a date folder if the absolute date path is passed in
+        * Images per TimePrompts
+        """
+        path = Path(path) # just in case the path provided is a string
+        if(not os.path.exists(path)): # I know no other way with FakeFilesystem to first check if dirctory exists first.
+            self.fs.create_dir(path) # Does not support  exist_ok=True flag like makedirs does :/
+        for date, timePrompts in dateDictStructure.items():
+            self.fs.create_dir(path/date)
+            for timePrompt, images in timePrompts.items():
+                self.fs.create_dir(directory_path=path/date/timePrompt)
+                for image in images:
+                    # Use a real image to simplify the test
+                    self.fs.add_real_file(source_path=get_project_root()/'..'/'testResources'/'images'/'ai'/"test1.png", target_path=path/date/timePrompt/image)
+
+
+@pytest.fixture
+def fshelpers(fs: FakeFilesystem,):
+    return FSHelpers(fs)
 
 
 @patch('imageProviders.ImageProvider')

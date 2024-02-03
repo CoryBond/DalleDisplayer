@@ -1,48 +1,15 @@
-import os
-from pathlib import Path
-from typing import Dict, List, Union
-
 import pytest
 
 from repoManager.DirectoryIterator import DirectoryIterator
 from repoManager.Models import ImagePromptDirectory
 
-from utils.pathingUtils import get_project_root
 from utils.enums import DIRECTION
-
-from pyfakefs.fake_filesystem import FakeFilesystem 
-
-
-TimeWithPromptDictType = Dict[str, List[str]]
-DateDictType = Dict[str, TimeWithPromptDictType]
 
 
 TEST_RESOURCES_FOLDER_NAME = "testResources"
 
 
-def populate_fs_with(fs: FakeFilesystem, path: Union[Path, str], dateDictStructure : DateDictType):
-   """
-   Simulates a files and folders in a fake file system when accessing the images repo.
-
-   Will populate the fake file system with:
-
-   * Dates folder
-   * The TimePrompts of a date folder if the absolute date path is passed in
-   * Images per TimePrompts
-   """
-   path = Path(path) # just in case the path provided is a string
-   if(not os.path.exists(path)): # I know no other way with FakeFilesystem to first check if dirctory exists first.
-      fs.create_dir(path) # Does not support  exist_ok=True flag like makedirs does :/
-   for date, timePrompts in dateDictStructure.items():
-      fs.create_dir(path/date)
-      for timePrompt, images in timePrompts.items():
-         fs.create_dir(directory_path=path/date/timePrompt)
-         for image in images:
-            # Use a real image to simplify the test
-            fs.add_real_file(source_path=get_project_root()/'..'/'testResources'/'images'/'ai'/"test1.png", target_path=path/date/timePrompt/image)
-
-
-def test_exception_thrown_on_existant_directory(fs: FakeFilesystem):
+def test_exception_thrown_on_existant_directory(fshelpers):
    """
    Given non-existent path to directories 
    When DirectoryIterator created
@@ -56,73 +23,32 @@ def test_exception_thrown_on_existant_directory(fs: FakeFilesystem):
       DirectoryIterator(pathToDirectories = "NotExists")
 
 
-def test_empty_repo_get_current_image_prompt_directory(fs: FakeFilesystem):
+def test_empty_repo_next(fshelpers):
    """
    Given empty file repo
-   When get_current_image_prompt_directory called
-   Then returned directory is none
-   """
-   # Arrange
-   
-   fsState = {}
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
-
-   # Act
-   directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME)
-   firstDirectory = directoryIterator.get_current_image_prompt_directory()
-
-   # Assert
-   assert firstDirectory is None
-
-
-def test_empty_repo_get_next_time_prompt_directories(fs: FakeFilesystem):
-   """
-   Given empty file repo
-   When get_next_time_prompt_directories called
-   Then returned directory is none
+   When next called
+   Then iterator exhausted
    """
    # Arrange
    fsState = {}
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME)
-   nextDirectory = next(directoryIterator)
 
    # Assert
-   assert nextDirectory is None
+   try:
+       next(directoryIterator)
+   except StopIteration:
+      assert True
+   else:
+      assert False
 
 
-
-def test_one_time_prompt_get_current_image_prompt_directory(fs: FakeFilesystem):
-   """
-   Given single prompt entry
-   When get_current_image_prompt_directory called
-   Then single prompt entry returned
-   """
-   # Arrange
-   fsState = {
-      "2024-01-14": { 
-         "03:03:45.522668_Shrek Eat Chips": ["1.png"]
-      }
-   }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
-
-   # Act
-   directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME)
-   firstDirectory = directoryIterator.get_current_image_prompt_directory()
-
-   # Assert
-   assert firstDirectory.date == "2024-01-14"
-   assert firstDirectory.time == "03:03:45.522668"
-   assert firstDirectory.prompt == "Shrek Eat Chips"
-   assert firstDirectory.repo == TEST_RESOURCES_FOLDER_NAME
-
-
-def test_backwards_one_time_prompt_get_next_time_prompt_directories(fs: FakeFilesystem):
+def test_backwards_one_time_prompt_next(fshelpers):
    """
    Given single prompt entry and directory iterator set to start backwards
-   When get_next_time_prompt_directories called
+   When next called
    Then single prompt entry returned
    """
    # Arrange
@@ -131,7 +57,7 @@ def test_backwards_one_time_prompt_get_next_time_prompt_directories(fs: FakeFile
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME, direction = DIRECTION.BACKWARD)
 
@@ -145,11 +71,11 @@ def test_backwards_one_time_prompt_get_next_time_prompt_directories(fs: FakeFile
    assert firstDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
      
-def test_one_time_prompt_get_current_image_prompt_directory(fs: FakeFilesystem):
+def test_exhausting_iterator(fshelpers):
    """
    Given single prompt entry
-   When get_current_image_prompt_directory called
-   Then nothing returned
+   When next called till exhuastion
+   Then iterator exhausted
    """
    # Arrange
    fsState = {
@@ -157,20 +83,26 @@ def test_one_time_prompt_get_current_image_prompt_directory(fs: FakeFilesystem):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME)
-   nextDirectory = directoryIterator.get_current_image_prompt_directory()
+   next(directoryIterator)
 
    # Assert
-   assert nextDirectory is None
+   try:
+       next(directoryIterator)
+   except StopIteration:
+      assert True
+   else:
+      assert False
 
 
-def test_two_time_prompt_get_next_time_prompt_directories(fs: FakeFilesystem):
+
+def test_two_time_prompt_next(fshelpers):
    """
    Given two prompt entries
-   When get_next_time_prompt_directories called
+   When next called
    Then most recent entry returned
    """
    # Arrange
@@ -180,7 +112,7 @@ def test_two_time_prompt_get_next_time_prompt_directories(fs: FakeFilesystem):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME)
@@ -193,36 +125,10 @@ def test_two_time_prompt_get_next_time_prompt_directories(fs: FakeFilesystem):
    assert firstDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_backwards_two_time_prompt_get_current_image_prompt_directory(fs: FakeFilesystem):
-   """
-   Given two prompt entries and directory iterator set to start backwards
-   When get_current_image_prompt_directory called
-   Then least recent entry returned
-   """
-   # Arrange
-   fsState = {
-      "2024-01-14": { 
-         "01:03:45.522668_Donkey Eat Chips": ["1.png"],
-         "03:03:45.522668_Shrek Eat Chips": ["1.png"]
-      }
-   }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
-
-   # Act
-   directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME, direction = DIRECTION.BACKWARD)
-   firstDirectory = next(directoryIterator)
-
-   # Assert
-   assert firstDirectory.date == "2024-01-14"
-   assert firstDirectory.time == "01:03:45.522668"
-   assert firstDirectory.prompt == "Donkey Eat Chips"
-   assert firstDirectory.repo == TEST_RESOURCES_FOLDER_NAME
-
-
-def test_two_time_prompt_get_second_time_prompt_directories(fs: FakeFilesystem):
+def test_two_time_prompt_get_second_time_prompt_directories(fshelpers):
    """
    Given two prompt entries
-   When get_next_time_prompt_directories called
+   When next called
    Then 2nd most recent entry returned
    """
    # Arrange
@@ -232,7 +138,7 @@ def test_two_time_prompt_get_second_time_prompt_directories(fs: FakeFilesystem):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME)
@@ -246,11 +152,11 @@ def test_two_time_prompt_get_second_time_prompt_directories(fs: FakeFilesystem):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_backwards_two_time_prompt_get_next_time_prompt_directories(fs: FakeFilesystem):
+def test_backwards_two_time_prompt_next(fshelpers):
    """
    Given two prompt entries and directory iterator set to start backwards
-   When backwards get_next_time_prompt_directories called
-   Then most recent entry returned
+   When multiple next called
+   Then next next entry is returned
    """
    # Arrange
    fsState = {
@@ -259,7 +165,7 @@ def test_backwards_two_time_prompt_get_next_time_prompt_directories(fs: FakeFile
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME, direction = DIRECTION.BACKWARD)
@@ -273,11 +179,11 @@ def test_backwards_two_time_prompt_get_next_time_prompt_directories(fs: FakeFile
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_two_date_get_next_time_prompt_directories(fs: FakeFilesystem):
+def test_two_date_next(fshelpers):
    """
    Given two prompt entries across dates
-   When get_next_time_prompt_directories called
-   Then entry in the next date directory returned
+   When multiple next called
+   Then next next entry is returned
    """
    # Arrange
    fsState = {
@@ -288,7 +194,7 @@ def test_two_date_get_next_time_prompt_directories(fs: FakeFilesystem):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME)
@@ -302,11 +208,11 @@ def test_two_date_get_next_time_prompt_directories(fs: FakeFilesystem):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_backwards_two_date_get_next_time_prompt_directories(fs: FakeFilesystem):
+def test_backwards_two_date_next(fshelpers):
    """
-   Given two prompt entries across dates and directory iterator set to start backwards
-   When backwards get_next_time_prompt_directories called
-   Then most recent entry returned
+   Given two prompt entries across dates, iterator set to backwards and directory iterator set to start backwards
+   When multiple next called
+   Then next next entry is returned
    """
    # Arrange
    fsState = {
@@ -317,7 +223,7 @@ def test_backwards_two_date_get_next_time_prompt_directories(fs: FakeFilesystem)
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME, direction = DIRECTION.BACKWARD)
@@ -331,11 +237,11 @@ def test_backwards_two_date_get_next_time_prompt_directories(fs: FakeFilesystem)
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_starting_directory_provided(fs: FakeFilesystem):
+def test_starting_directory_provided(fshelpers):
    """
-   Given two prompt entries across dates and directory iterator set to start backwards
-   When backwards get_next_time_prompt_directories called
-   Then most recent entry returned
+   Given two prompt entries across dates and starting directory is at the front
+   When next called
+   Then first directory returned
    """
    # Arrange
    fsState = {
@@ -346,7 +252,7 @@ def test_starting_directory_provided(fs: FakeFilesystem):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    startingDirectory = ImagePromptDirectory(
       prompt="blah blah",
@@ -366,11 +272,11 @@ def test_starting_directory_provided(fs: FakeFilesystem):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_starting_directory_in_middle_provided(fs: FakeFilesystem):
+def test_starting_directory_in_middle_provided(fshelpers):
    """
-   Given two prompt entries across dates and directory iterator set to start backwards
-   When backwards get_next_time_prompt_directories called
-   Then most recent entry returned
+   Given two prompt entries across dates and starting directory is in the middle
+   When next called
+   Then next directory is returned
    """
    # Arrange
    fsState = {
@@ -381,7 +287,7 @@ def test_starting_directory_in_middle_provided(fs: FakeFilesystem):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    startingDirectory = ImagePromptDirectory(
       prompt="blah blah",
@@ -401,11 +307,11 @@ def test_starting_directory_in_middle_provided(fs: FakeFilesystem):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_starting_directory_at_end_provided(fs: FakeFilesystem):
+def test_starting_directory_at_end_provided(fshelpers):
    """
-   Given two prompt entries across dates and directory iterator set to start backwards
-   When backwards get_next_time_prompt_directories called
-   Then most recent entry returned
+   Given two prompt entries across dates and starting directory is at the end
+   When next called
+   Then iterator is exhausted
    """
    # Arrange
    fsState = {
@@ -416,7 +322,7 @@ def test_starting_directory_at_end_provided(fs: FakeFilesystem):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    startingDirectory = ImagePromptDirectory(
       prompt="Donkey Eat Chips",
@@ -427,17 +333,21 @@ def test_starting_directory_at_end_provided(fs: FakeFilesystem):
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME, startingDirectory=startingDirectory)
-   nextDirectory = next(directoryIterator)
 
    # Assert
-   assert nextDirectory is None
+   try:
+       next(directoryIterator)
+   except StopIteration:
+      assert True
+   else:
+      assert False
 
 
-def test_backwards_starting_directory_at_end_provided(fs: FakeFilesystem):
+def test_backwards_starting_directory_at_end_provided(fshelpers):
    """
-   Given two prompt entries across dates and directory iterator set to start backwards
-   When backwards get_next_time_prompt_directories called
-   Then most recent entry returned
+   Given two prompt entries across dates, iterator going backwards and starting directory is at the end
+   When next called
+   Then end directory returned
    """
    # Arrange
    fsState = {
@@ -448,7 +358,7 @@ def test_backwards_starting_directory_at_end_provided(fs: FakeFilesystem):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    startingDirectory = ImagePromptDirectory(
       prompt="blah blah",
@@ -468,11 +378,11 @@ def test_backwards_starting_directory_at_end_provided(fs: FakeFilesystem):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_starting_directory_in_middle_provided(fs: FakeFilesystem):
+def test_backwards_starting_directory_in_middle_provided(fshelpers):
    """
-   Given two prompt entries across dates and directory iterator set to start backwards
-   When backwards get_next_time_prompt_directories called
-   Then most recent entry returned
+   Given two prompt entries across dates, iterator going backwards and starting directory is in the middle
+   When next called
+   Then next entry returned
    """
    # Arrange
    fsState = {
@@ -483,7 +393,7 @@ def test_starting_directory_in_middle_provided(fs: FakeFilesystem):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    startingDirectory = ImagePromptDirectory(
       prompt="blah blah",
@@ -503,11 +413,11 @@ def test_starting_directory_in_middle_provided(fs: FakeFilesystem):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_starting_directory_provided(fs: FakeFilesystem):
+def test_backwards_starting_directory_provided(fshelpers):
    """
-   Given two prompt entries across dates and directory iterator set to start backwards
-   When backwards get_next_time_prompt_directories called
-   Then most recent entry returned
+   Given two prompt entries across dates, iterator going backwards and starting directory is at the beginning
+   When next called
+   Then iterator exhausted
    """
    # Arrange
    fsState = {
@@ -518,7 +428,7 @@ def test_starting_directory_provided(fs: FakeFilesystem):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, fsState)
+   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
 
    startingDirectory = ImagePromptDirectory(
       prompt="Shrek Eat Chips",
@@ -529,7 +439,11 @@ def test_starting_directory_provided(fs: FakeFilesystem):
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME, startingDirectory=startingDirectory, direction = DIRECTION.BACKWARD)
-   nextDirectory = next(directoryIterator)
 
    # Assert
-   assert nextDirectory is None
+   try:
+       next(directoryIterator)
+   except StopIteration:
+      assert True
+   else:
+      assert False

@@ -17,7 +17,7 @@ class ImageProvider(object):
     Methods
     -------
     get_image_from_string(prompt)
-        Retrieves image from API. Returns PIL Image object. Returns 'None' object on failure
+        Retrieves image from API. Image as bytes. Returns 'None' on failure
     """
     def __init__(self, key=None, keyname=None):
         self.key = key
