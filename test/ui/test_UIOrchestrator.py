@@ -10,21 +10,24 @@ from pytestqt.qtbot import QtBot
 
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
+from pyfakefs.fake_filesystem import FakeFilesystem 
+from utils_for_test import populate_fs_with
 
 
 @pytest.mark.timeout(10)
-def test_home_page_loads_with_default_state(containerWithMocks: Container, qtbot: QtBot, fshelpers):
+def test_home_page_loads_with_default_state(containerWithMocks: Container, qtbot: QtBot, fs: FakeFilesystem):
    """
-   Given lots of prompt entries
-   When many subsequent calls to get_images with token provided (and backwards)
-   Then result of the next page returned (sorted by most recent entries)
+   Given application
+   When loaded for the very first time
+   Then default homepage shows up
    """
 
    # Arrange
    # Setup fake file system
    repoConfiguredPath = containerWithMocks.repoManager().current_repo_abs_path()
    fsState = {}
-   fshelpers.populate_fs_with(repoConfiguredPath, fsState)
+   populate_fs_with(fs,repoConfiguredPath, dateDictStructure=fsState)
+
 
    # Act
    containerWithMocks.uiOrchestrator().start_with_bot(qtbot)
@@ -38,11 +41,11 @@ def test_home_page_loads_with_default_state(containerWithMocks: Container, qtbot
 
 
 @pytest.mark.timeout(25)
-def test_home_page_image_generation_refreshes_gallery(containerWithMocks: Container, qtbot: QtBot, fshelpers):
+def test_home_page_image_generation_refreshes_gallery(containerWithMocks: Container, qtbot: QtBot, fs: FakeFilesystem):
    """
-   Given lots of prompt entries
-   When many subsequent calls to get_images with token provided (and backwards)
-   Then result of the next page returned (sorted by most recent entries)
+   Given application
+   When user clicks generate image
+   Then gallery page refreshes
    """
 
    # Arrange
@@ -50,7 +53,7 @@ def test_home_page_image_generation_refreshes_gallery(containerWithMocks: Contai
    # Setup fake file system
    repoConfiguredPath = containerWithMocks.repoManager().current_repo_abs_path()
    fsState = {}
-   fshelpers.populate_fs_with(repoConfiguredPath, fsState)
+   populate_fs_with(fs,repoConfiguredPath, dateDictStructure=fsState)
    containerWithMocks.uiOrchestrator().start_with_bot(qtbot)
 
    mainWindow = containerWithMocks.mainWindow()

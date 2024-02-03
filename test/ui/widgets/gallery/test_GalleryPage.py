@@ -6,19 +6,20 @@ import pytest
 from depdencyInjection.Container import Container
 
 from pytestqt.qtbot import QtBot
+from pyfakefs.fake_filesystem import FakeFilesystem 
 
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 
-from pyfakefs.fake_filesystem import FakeFilesystem 
+from utils_for_test import populate_fs_with
 
 
 @pytest.mark.timeout(10)
-def test_gallery_loads_correctly(containerWithMocks: Container, qtbot: QtBot, fshelpers):
+def test_gallery_loads_correctly(containerWithMocks: Container, qtbot: QtBot, fs: FakeFilesystem):
     """
-    Given lots of prompt entries
-    When many subsequent calls to get_images with token provided (and backwards)
-    Then result of the next page returned (sorted by most recent entries)
+    Given no images saved
+    When loads up
+    Then empty gallery displayed on first page
     """
 
     # Arrange
@@ -26,7 +27,7 @@ def test_gallery_loads_correctly(containerWithMocks: Container, qtbot: QtBot, fs
 
     # Setup fake file system
     fsState = {}
-    fshelpers.populate_fs_with(repoManager.current_repo_abs_path(), fsState)
+    populate_fs_with(fs, repoManager.current_repo_abs_path(), fsState)
 
     # Act
     gallery = containerWithMocks.gallery()
@@ -44,11 +45,11 @@ def test_gallery_loads_correctly(containerWithMocks: Container, qtbot: QtBot, fs
 
 
 @pytest.mark.timeout(20)
-def test_gallery_loads_with_images(containerWithMocks: Container, qtbot: QtBot, fshelpers):
+def test_gallery_loads_with_images(containerWithMocks: Container, qtbot: QtBot, fs: FakeFilesystem):
     """
-    Given lots of prompt entries
-    When many subsequent calls to get_images with token provided (and backwards)
-    Then result of the next page returned (sorted by most recent entries)
+    Given images already saved
+    When loads up
+    Then first page displayed
     """
 
     # Arrange
@@ -70,7 +71,7 @@ def test_gallery_loads_with_images(containerWithMocks: Container, qtbot: QtBot, 
             "03:03:45.522668_Shrek Eat Chips10": ["1.png"], # second page
         }
     }
-    fshelpers.populate_fs_with(repoManager.current_repo_abs_path(), fsState)
+    populate_fs_with(fs, repoManager.current_repo_abs_path(), fsState)
     
     # Act
     gallery = containerWithMocks.gallery()
@@ -91,11 +92,11 @@ def test_gallery_loads_with_images(containerWithMocks: Container, qtbot: QtBot, 
 
 
 @pytest.mark.timeout(40)
-def test_gallery_forward_button_click(containerWithMocks: Container, qtbot: QtBot, fshelpers):
+def test_gallery_forward_button_click(containerWithMocks: Container, qtbot: QtBot, fs: FakeFilesystem):
     """
-    Given lots of prompt entries
-    When many subsequent calls to get_images with token provided (and backwards)
-    Then result of the next page returned (sorted by most recent entries)
+    Given 1 page in a gallery
+    When user clicks forward button
+    Then second page displayed
     """
 
     # Arrange
@@ -118,7 +119,7 @@ def test_gallery_forward_button_click(containerWithMocks: Container, qtbot: QtBo
             "03:03:45.522668_Shrek Eat Chips11": ["1.png"],
         }
     }
-    fshelpers.populate_fs_with(repoManager.current_repo_abs_path(), fsState)
+    populate_fs_with(fs, repoManager.current_repo_abs_path(), fsState)
 
     gallery = containerWithMocks.gallery()
     qtbot.addWidget(gallery)
