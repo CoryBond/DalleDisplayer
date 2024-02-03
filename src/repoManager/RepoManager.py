@@ -255,11 +255,12 @@ class RepoManager(object):
         if(number < 1):
             return GetImagePrompsResult(results=[], errorMessage="Number must be greater then 0")
 
-        directoryIterator = DirectoryIterator(pathToDirectories=self.imageRepo, startingDirectory=startingDirectory)
         imagePromptResults: List[ImagePrompResult] = []
         errorMessage = None
 
         try:
+            directoryIterator = DirectoryIterator(pathToDirectories=self.imageRepo, startingDirectory=startingDirectory, direction=direction)
+
             # If going backwards add the current directory but only if it actually exists. Otherwise continue iterating from the start directory.
             if(direction is DIRECTION.BACKWARD and self._directory_exists(startingDirectory)):
                 imagePromptResults.append(self._get_files(directory=startingDirectory))
@@ -267,7 +268,7 @@ class RepoManager(object):
             # Iterate prompt directories until either we found enough prompt directories to match the number requested or until there are none left in the direction we are iterating
             for _ in range(len(imagePromptResults), number):
                 # if going backwards the token provided will be within the next page. As such include it. There are also scenarios (first initialization) where a caller needs to force include a forward direciton call too
-                nextTimeWithPromptDirectory = directoryIterator.get_next_time_prompt_directories(direction)
+                nextTimeWithPromptDirectory = next(directoryIterator)
 
                 # if 
                 if(nextTimeWithPromptDirectory is not None):
@@ -283,7 +284,7 @@ class RepoManager(object):
             # Order the page worth of data as though the direction was forward rather then backward
             if direction is DIRECTION.BACKWARD:
                 imagePromptResults.reverse()
-                nextToken= generate_nextToken(directoryIterator.get_next_time_prompt_directories(direction))
+                nextToken= generate_nextToken(next(directoryIterator))
             else:
                 nextToken = generate_nextToken(directoryIterator.get_current_image_prompt_directory())
 
