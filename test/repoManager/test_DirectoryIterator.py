@@ -1,15 +1,19 @@
 import pytest
+from pathlib import Path
 
 from repoManager.DirectoryIterator import DirectoryIterator
 from repoManager.Models import ImagePromptDirectory
 
+from pyfakefs.fake_filesystem import FakeFilesystem 
+
 from utils.enums import DIRECTION
+from utils_for_test import populate_fs_with
 
 
 TEST_RESOURCES_FOLDER_NAME = "testResources"
 
 
-def test_exception_thrown_on_existant_directory(fshelpers):
+def test_exception_thrown_on_existant_directory(fs: FakeFilesystem):
    """
    Given non-existent path to directories 
    When DirectoryIterator created
@@ -23,7 +27,7 @@ def test_exception_thrown_on_existant_directory(fshelpers):
       DirectoryIterator(pathToDirectories = "NotExists")
 
 
-def test_empty_repo_next(fshelpers):
+def test_empty_repo_next(fs: FakeFilesystem):
    """
    Given empty file repo
    When next called
@@ -31,7 +35,7 @@ def test_empty_repo_next(fshelpers):
    """
    # Arrange
    fsState = {}
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME)
@@ -45,7 +49,7 @@ def test_empty_repo_next(fshelpers):
       assert False
 
 
-def test_backwards_one_time_prompt_next(fshelpers):
+def test_backwards_one_time_prompt_next(fs: FakeFilesystem):
    """
    Given single prompt entry and directory iterator set to start backwards
    When next called
@@ -57,9 +61,9 @@ def test_backwards_one_time_prompt_next(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, Path(TEST_RESOURCES_FOLDER_NAME), dateDictStructure=fsState)
 
-   directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME, direction = DIRECTION.BACKWARD)
+   directoryIterator = DirectoryIterator(pathToDirectories = Path(TEST_RESOURCES_FOLDER_NAME), direction = DIRECTION.BACKWARD)
 
    # Act
    firstDirectory = next(directoryIterator)
@@ -71,7 +75,7 @@ def test_backwards_one_time_prompt_next(fshelpers):
    assert firstDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
      
-def test_exhausting_iterator(fshelpers):
+def test_exhausting_iterator(fs: FakeFilesystem):
    """
    Given single prompt entry
    When next called till exhuastion
@@ -83,7 +87,7 @@ def test_exhausting_iterator(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME)
@@ -98,8 +102,7 @@ def test_exhausting_iterator(fshelpers):
       assert False
 
 
-
-def test_two_time_prompt_next(fshelpers):
+def test_two_time_prompt_next(fs: FakeFilesystem):
    """
    Given two prompt entries
    When next called
@@ -112,7 +115,7 @@ def test_two_time_prompt_next(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME)
@@ -125,7 +128,7 @@ def test_two_time_prompt_next(fshelpers):
    assert firstDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_two_time_prompt_get_second_time_prompt_directories(fshelpers):
+def test_two_time_prompt_get_second_time_prompt_directories(fs: FakeFilesystem):
    """
    Given two prompt entries
    When next called
@@ -138,7 +141,7 @@ def test_two_time_prompt_get_second_time_prompt_directories(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME)
@@ -152,7 +155,7 @@ def test_two_time_prompt_get_second_time_prompt_directories(fshelpers):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_backwards_two_time_prompt_next(fshelpers):
+def test_backwards_two_time_prompt_next(fs: FakeFilesystem):
    """
    Given two prompt entries and directory iterator set to start backwards
    When multiple next called
@@ -165,7 +168,7 @@ def test_backwards_two_time_prompt_next(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME, direction = DIRECTION.BACKWARD)
@@ -179,7 +182,7 @@ def test_backwards_two_time_prompt_next(fshelpers):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_two_date_next(fshelpers):
+def test_two_date_next(fs: FakeFilesystem):
    """
    Given two prompt entries across dates
    When multiple next called
@@ -194,7 +197,7 @@ def test_two_date_next(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME)
@@ -208,7 +211,7 @@ def test_two_date_next(fshelpers):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_backwards_two_date_next(fshelpers):
+def test_backwards_two_date_next(fs: FakeFilesystem):
    """
    Given two prompt entries across dates, iterator set to backwards and directory iterator set to start backwards
    When multiple next called
@@ -223,7 +226,7 @@ def test_backwards_two_date_next(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    # Act
    directoryIterator = DirectoryIterator(pathToDirectories = TEST_RESOURCES_FOLDER_NAME, direction = DIRECTION.BACKWARD)
@@ -237,7 +240,7 @@ def test_backwards_two_date_next(fshelpers):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_starting_directory_provided(fshelpers):
+def test_starting_directory_provided(fs: FakeFilesystem):
    """
    Given two prompt entries across dates and starting directory is at the front
    When next called
@@ -252,7 +255,7 @@ def test_starting_directory_provided(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    startingDirectory = ImagePromptDirectory(
       prompt="blah blah",
@@ -272,7 +275,7 @@ def test_starting_directory_provided(fshelpers):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_starting_directory_in_middle_provided(fshelpers):
+def test_starting_directory_in_middle_provided(fs: FakeFilesystem):
    """
    Given two prompt entries across dates and starting directory is in the middle
    When next called
@@ -287,7 +290,7 @@ def test_starting_directory_in_middle_provided(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    startingDirectory = ImagePromptDirectory(
       prompt="blah blah",
@@ -307,7 +310,7 @@ def test_starting_directory_in_middle_provided(fshelpers):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_starting_directory_at_end_provided(fshelpers):
+def test_starting_directory_at_end_provided(fs: FakeFilesystem):
    """
    Given two prompt entries across dates and starting directory is at the end
    When next called
@@ -322,7 +325,7 @@ def test_starting_directory_at_end_provided(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    startingDirectory = ImagePromptDirectory(
       prompt="Donkey Eat Chips",
@@ -343,7 +346,7 @@ def test_starting_directory_at_end_provided(fshelpers):
       assert False
 
 
-def test_backwards_starting_directory_at_end_provided(fshelpers):
+def test_backwards_starting_directory_at_end_provided(fs: FakeFilesystem):
    """
    Given two prompt entries across dates, iterator going backwards and starting directory is at the end
    When next called
@@ -358,7 +361,7 @@ def test_backwards_starting_directory_at_end_provided(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    startingDirectory = ImagePromptDirectory(
       prompt="blah blah",
@@ -378,7 +381,7 @@ def test_backwards_starting_directory_at_end_provided(fshelpers):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_backwards_starting_directory_in_middle_provided(fshelpers):
+def test_backwards_starting_directory_in_middle_provided(fs: FakeFilesystem):
    """
    Given two prompt entries across dates, iterator going backwards and starting directory is in the middle
    When next called
@@ -393,7 +396,7 @@ def test_backwards_starting_directory_in_middle_provided(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    startingDirectory = ImagePromptDirectory(
       prompt="blah blah",
@@ -413,7 +416,7 @@ def test_backwards_starting_directory_in_middle_provided(fshelpers):
    assert nextDirectory.repo == TEST_RESOURCES_FOLDER_NAME
 
 
-def test_backwards_starting_directory_provided(fshelpers):
+def test_backwards_starting_directory_provided(fs: FakeFilesystem):
    """
    Given two prompt entries across dates, iterator going backwards and starting directory is at the beginning
    When next called
@@ -428,7 +431,7 @@ def test_backwards_starting_directory_provided(fshelpers):
          "03:03:45.522668_Shrek Eat Chips": ["1.png"]
       }
    }
-   fshelpers.populate_fs_with(TEST_RESOURCES_FOLDER_NAME, fsState)
+   populate_fs_with(fs, TEST_RESOURCES_FOLDER_NAME, dateDictStructure=fsState)
 
    startingDirectory = ImagePromptDirectory(
       prompt="Shrek Eat Chips",
