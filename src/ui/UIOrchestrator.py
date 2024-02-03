@@ -10,7 +10,6 @@ from ui.widgets.gallery.GalleryPage import GalleryPage
 from ui.widgets.home.HomePage import HomePage
 from ui.widgets.home.ImageMeta import ImageMetaInfo
 
-from PIL import ImageQt
 
 class QtBot():
     """
@@ -54,7 +53,6 @@ class UIOrchestrator():
 
         # Home Page Image Generation Must Refresh Gallery
         def refreshGallery():
-            logging.info("HEEEEEE")
             self.galleryPage.galleryRefreshedSignal.emit()
         self.homePage.saveImageSignal.connect(refreshGallery)
 

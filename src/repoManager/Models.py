@@ -1,4 +1,3 @@
-from io import BytesIO
 from typing import List, Union
 from decorators.decorators import auto_str
 
@@ -23,7 +22,7 @@ class NextToken(object):
 
 @auto_str
 class ImagePrompResult(object):
-    def __init__(self, prompt: str, repo: str, date: str, time: str, num: int, images: List[BytesIO]):
+    def __init__(self, prompt: str, repo: str, date: str, time: str, num: int, images: List[bytes]):
         self.prompt = prompt
         self.repo = repo
         self.date = date

@@ -8,9 +8,8 @@ from pathlib import Path
 from unittest.mock import patch                                       
 from depdencyInjection.Container import Container
 from imageProviders.ImageProvider import ImageProvider, ImageProviderResult
-from PIL import Image
 
-from utils.pathingUtils import get_project_root, get_or_create_resources
+from utils.pathingUtils import get_project_root, get_or_create_resources, read_file_as_bytes
 from pyfakefs.fake_filesystem import FakeFilesystem 
 
 
@@ -29,8 +28,8 @@ def test_image_generator():
         Will also simulate "lag" by sleeping the current thread.
         Should be run in a seperate thread as to prevent UI event loop from being freezed as well.
         """
-        TestFile1 = Image.open(get_project_root()/'..'/'testResources'/'images'/'ai'/"test1.png")
-        TestFile2 = Image.open(get_project_root()/'..'/'testResources'/'images'/'ai'/"test2.png")
+        TestFile1 = read_file_as_bytes(get_project_root()/'..'/'testResources'/'images'/'ai'/"test1.png")
+        TestFile2 = read_file_as_bytes(get_project_root()/'..'/'testResources'/'images'/'ai'/"test2.png")
         i = 0
         def cb(prompt: str) -> ImageProviderResult:
             nonlocal i 

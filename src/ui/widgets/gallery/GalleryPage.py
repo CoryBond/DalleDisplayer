@@ -2,7 +2,6 @@ import logging
 from typing import Callable
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton
 from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtGui import QImage
 from repoManager.Models import NextToken
 
 from ui.dialogs.ErrorMessage import ErrorMessage
@@ -60,7 +59,7 @@ class GalleryPage(QWidget):
     has_photo()
         Returns if the current view has any image loaded to it currently
     """
-    imageClickedSignal = pyqtSignal(ImageMetaInfo, QImage)
+    imageClickedSignal = pyqtSignal(ImageMetaInfo, object)
     galleryRefreshedSignal = pyqtSignal()
 
     def __init__(self, repoManager: RepoManager):
