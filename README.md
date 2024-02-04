@@ -34,51 +34,72 @@ This is a side project I am working on as I upgraded my retropie gaming system t
 
 Featrues:
 
-1. Menu Bar containing:
+1. Menu Bar containing: [✅]
   1. Home
   2. Gallery
   3. Settings
-2. Refactor MainWindow content between a QT MainWindow and a "Home Widget" making it possible to switch between pages in the MainWindow
-3. Refactor current MainWindow (Home Widget) into 3 seperate widgets:
+2. Refactor MainWindow content between a QT MainWindow and a "Home Widget" making it possible to switch between pages in the MainWindow [✅]
+3. Refactor current MainWindow (Home Widget) into 3 seperate widgets: [✅]
   1. Image Generator Sidebar
   2. Image Viewer (already exists)
   3. AI Result Meta Sidebar
-4. Image Generator
+4. Image Generator [✅]
   1. Add Image Generator Control To Select Engine (default Dalle-3)
     1. Does not need implementation. Can be forced to use Dalle-3 for now.
   2. Add ability to select how many images to make per request
     1. Does not need implementation. Can be just "1" for Dalle-3.
   3. Refactor Image Generator to allow pluginable controls per engine (options may differ per engine)
   4. Turn Image Generator into a sidebar for a better UX experience
-5. AI Result Meta Sidbar
+5. AI Result Meta Sidbar [✅]
   1. Takes in the current meta info (prompt, current image num, date created, time created, engine used)
   2. Option to select 1-4+ images that were generated for the prompt at the given dateTime with the engine
     1. Selection modifies what is shown in ImageViewer at any one point
     2. Updates the num selection info in the AI Result Meta Sidebar
     3. Sidebar can be collapsed and re-expanded if needed or not
-6. Gallery
+6. Gallery [✅]
   1. Menu item switches from the Home page to the Gallery
   2. Gallery is layed out by prompt + timestamp
   3. Under each unique section you can see preview images of the actual images created
   4. Selecting any image loads the image into Home, populating the Image Viewer and The AI Result Meta Sidebar whiel auto-hiding the Image Creator sidebar
-7. Settings does nothing for now
+7. Settings does nothing for now [❌]
   1. Potential backlog in future versions:
     1. Switch theme
     2. Add wifi (increase PAIID mobility)
 
 
-Additional Stretch Goals (not required for 2.0 release):
+**Version 2.1**
 
-1. Replace or improve voice input
+Featrues:
+
+1. On Gallery Page
+  1. Ability to delete entire time prompt directories
+  2. Page refreshes on deleted entry
+
+
+**Version 3.0**
+
+Featrues:
+
+1. Filtering On Gallery
+  1. Date range
+  2. Time Range
+  3. Previous Prompts
+2. Ability to switch between AI generators
+3. Stable Diffusion Provider implemented
+4. Better way to configure API Keys
+
+
+Additional Stretch Goals (not required for 3.0 release):
+
+1. Replace or improve voice input 
   1. Use another tool besides the Google AI.
   2. Maybe buy tokens for a better service.
   3. Make it more clear if a transcription faild and the user needs to repeat themselves.
-2. Clean up either the requirements.txt or myproject.toml to use specific versions of packages. 
+2. Clean up either the requirements.txt or myproject.toml to use specific versions of packages.
 
 Bug Fixes:
 
 1. Make it so the loading popup doesn't go away if the user clicks out of it
-2. Fix pytest that run against QT (currenty facing xxxxx error)
 3. Recorder dialog sometimes hangs or crashes when try to open it. 
   * Might be the previous recording still hasn't closed yet from the last dialog
   * Might need to pre-load only 1 dialog or handle some way for the SpeechRecognizer to wait until the last recording session has ended.
