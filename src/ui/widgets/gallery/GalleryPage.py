@@ -43,25 +43,24 @@ PAGE_SIZE = 10
 
 class GalleryPage(QWidget):
     """
-    QT Widget to display a singular and move a singular image.
-    
-    Images can be moved via:
-    1. Panning the image when click/touch drag movements
-    2. Zomming in/out of the image with a pinch (touch) gesture anywhere in the viewer
+    QT Widget to display a paginated array of image prompts that are already generated.
+    Has controls for changing the page.
 
     Attributes
     ----------
+    imageClickedSignal
+        signal that is emited when any image is clicked in the gallery
+
+    galleryRefreshSignal
+        signal, if emited, will refresh the contents of the gallery page
 
     Methods
     ----------
-    replace_image(imagePath)
-        Replaces the current image with a new one from the given path. The new image will "fit" into the views current frame when fully loaded.
-
-    has_photo()
-        Returns if the current view has any image loaded to it currently
+    change_page()
+        Changes the contents of the current page to another pages contents 
     """
     imageClickedSignal = pyqtSignal(ImageMetaInfo, object)
-    galleryRefreshedSignal = pyqtSignal()
+    galleryRefreshSignal = pyqtSignal()
 
     def __init__(self, repoManager: RepoManager):
         super().__init__()
@@ -76,7 +75,7 @@ class GalleryPage(QWidget):
 
         # pass through emit from child to this parent
         self.gallery.imageClickedSignal.connect(self.imageClickedSignal.emit)
-        self.galleryRefreshedSignal.connect(self.refresh_page)
+        self.galleryRefreshSignal.connect(self.refresh_page)
 
 
     def set_left_bookmark(self, bookmark: NextToken):

@@ -37,3 +37,13 @@ class GetImagePrompsResult(object):
         self.results = results
         self.nextToken = nextToken
         self.errorMessage = errorMessage
+
+
+@auto_str
+class DeleteImagePrompsRequest(object):
+    def __init__(self, prompt: str, repo: str, date: str, time: str, nums: List[int]):
+        self.prompt = prompt
+        self.repo = repo
+        self.date = date
+        self.time = time
+        self.nums = nums

@@ -71,6 +71,18 @@ Featrues:
 
 Featrues:
 
+1. Ability to delete image on Home page. [✅]
+
+
+Bug Fixes:
+
+1. Meta prompt display not word wrapping properly for prompts that have big words. [✅]
+
+
+**Version 2.2**
+
+Featrues:
+
 1. On Gallery Page
   1. Ability to delete entire time prompt directories
   2. Page refreshes on deleted entry

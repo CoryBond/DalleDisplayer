@@ -1,6 +1,8 @@
 import logging
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QFormLayout, QGroupBox, QLabel
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QFormLayout, QGroupBox, QLabel, QTextBrowser, QPushButton
+from PyQt5.QtGui import QTextOption
 from PyQt5.QtCore import pyqtSignal
+from ui.widgets.common.QLine import QHLine
 
 from utils.qtUtils import clear_layout
 
@@ -21,26 +23,22 @@ class ImageMeta(QWidget):
     loadMetaSignal = pyqtSignal(object)
 
     """
-    QT Widget to display a singular and move a singular image.
-    
-    Images can be moved via:
-    1. Panning the image when click/touch drag movements
-    2. Zomming in/out of the image with a pinch (touch) gesture anywhere in the viewer
+    QT Widget to display image meta data.
 
     Attributes
     ----------
+    loadMetaSignal
+        signal to load meta contents to the ImageMeta widget
 
     Methods
     ----------
-    replace_image(imagePath)
-        Replaces the current image with a new one from the given path. The new image will "fit" into the views current frame when fully loaded.
 
-    has_photo()
-        Returns if the current view has any image loaded to it currently
     """
 
-    def __init__(self, initMetaInfo: ImageMetaInfo = DefaultImageMeta):
+    def __init__(self, trashImageSignal: pyqtSignal, initMetaInfo: ImageMetaInfo = DefaultImageMeta):
         super().__init__()
+
+        self.trashImageSignal = trashImageSignal
 
         self.setGeometry(100, 100, 300, 400)
 
@@ -68,7 +66,10 @@ class ImageMeta(QWidget):
 
             metaDetailLayout = QFormLayout()
 
-            metaDetailLayout.addRow(QLabel("Prompt: "), QLabel(metaInfo.prompt))
+            promptLabel = QTextBrowser() # QTextBrowser better supports word wrap when words are so big they need to arbitrarily be cut across lines
+            promptLabel.setWordWrapMode(QTextOption.WrapAtWordBoundaryOrAnywhere)
+            promptLabel.setText(metaInfo.prompt)
+            metaDetailLayout.addRow(QLabel("Prompt: "), promptLabel)
             metaDetailLayout.addRow(QLabel("Date: "), QLabel(metaInfo.date))
             metaDetailLayout.addRow(QLabel("Time: "), QLabel(metaInfo.time))
             metaDetailLayout.addRow(QLabel("Engine: "), QLabel(metaInfo.engine))
@@ -79,3 +80,9 @@ class ImageMeta(QWidget):
             metaGroup.setLayout(metaLayout)
             self.layout().addWidget(metaGroup)
         
+            self.layout().addWidget(QHLine())
+
+            self.trashImageButton = QPushButton('Trash Image', self)
+            self.trashImageButton.setStyleSheet("background-color: red")
+            self.trashImageButton.clicked.connect(lambda : self.trashImageSignal.emit())
+            self.layout().addWidget(self.trashImageButton)

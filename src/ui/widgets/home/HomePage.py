@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtCore import pyqtSignal, QRunnable, QThreadPool
 
 from imageProviders.ImageProvider import ImageProvider, ImageProviderResult
+from repoManager.Models import DeleteImagePrompsRequest
 from repoManager.RepoManager import RepoManager, ImagePrompResult
 from ui.dialogs.ErrorMessage import ErrorMessage
 from ui.dialogs.LoadingPopup import LoadingPopup
@@ -37,27 +38,22 @@ def background_create_image_process(imageProvider: ImageProvider, prompt: str, l
 
 class HomePage(QSplitter):
     createImageSignal = pyqtSignal(str)
-    loadNewImageSignal = pyqtSignal(str, object)
-    loadImageSignal = pyqtSignal(ImageMetaInfo, object)
-    saveImageSignal = pyqtSignal()
+    loadNewImageSignal = pyqtSignal(str, dict)
+    loadImageSignal = pyqtSignal(ImageMetaInfo, bytes)
+    successfulSavedImageSignal = pyqtSignal()
+    trashImageSignal = pyqtSignal()
+    successfulTrashImageSignal = pyqtSignal()
 
     """
-    QT Widget to display a singular and move a singular image.
-    
-    Images can be moved via:
-    1. Panning the image when click/touch drag movements
-    2. Zomming in/out of the image with a pinch (touch) gesture anywhere in the viewer
+    QT Widget to generate and display AI images off of a prompt.
+    Will load up the last generated image in PAIID.
 
     Attributes
     ----------
 
     Methods
     ----------
-    replace_image(imagePath)
-        Replaces the current image with a new one from the given path. The new image will "fit" into the views current frame when fully loaded.
 
-    has_photo()
-        Returns if the current view has any image loaded to it currently
     """
 
     def __init__(self, repoManager: RepoManager, imageProvider : ImageProvider, speechRecognizer : SpeechRecognizer):
@@ -73,6 +69,7 @@ class HomePage(QSplitter):
         self.createImageSignal.connect(self.create_image_action)
         self.loadNewImageSignal.connect(self.load_new_image_response)
         self.loadImageSignal.connect(self.load_image_response)
+        self.trashImageSignal.connect(self.trash_image)
 
         loadResult = self.repoManager.get_latest_images_in_repo()
         self.init_ui(loadResult, speechRecognizer)
@@ -83,13 +80,15 @@ class HomePage(QSplitter):
         self.addWidget(self.imageGenerator)
         self.imageViewer = ImageViewer(lastImageResult.images[0] if lastImageResult is not None and len(lastImageResult.images) > 0 else None)
         self.addWidget(self.imageViewer)
-        self.imageMeta = ImageMeta(ImageMetaInfo(
+
+        self.imageMetaInfo = ImageMetaInfo(
                 prompt= lastImageResult.prompt, 
                 date= lastImageResult.date, 
                 time= lastImageResult.time, 
                 engine= lastImageResult.repo,
                 num= lastImageResult.num
-            ) if lastImageResult is not None else None)
+            ) if lastImageResult is not None else None
+        self.imageMeta = ImageMeta(self.trashImageSignal, self.imageMetaInfo)
         self.addWidget(self.imageMeta)
         self.setSizes([200, 800, 0])
 
@@ -102,24 +101,43 @@ class HomePage(QSplitter):
             ErrorMessage(response['errorMessage']).exec()
         else:
             saveResult = self.repoManager.save_image(prompt, response['img'])
-            self.saveImageSignal.emit()
+            self.successfulSavedImageSignal.emit()
 
             self.imageViewer.replace_image(saveResult.images[0])
-            self.imageMeta.loadMetaSignal.emit(ImageMetaInfo(
+            self.imageMetaInfo = ImageMetaInfo(
                 prompt= prompt,
                 date= saveResult.date,
                 time= saveResult.time,
                 engine= saveResult.repo,
                 num=str(saveResult.num)
-            ))
+            )
+            self.imageMeta.loadMetaSignal.emit(self.imageMetaInfo)
 
         self.loadingScreen.stop()
         self.imageGenerator.toggle_disabled_prompting(False)
 
 
-    def load_image_response(self, metaInfo: ImageMetaInfo, image):        
+    def load_image_response(self, metaInfo: ImageMetaInfo, image):
+        self.imageMetaInfo = metaInfo
         self.imageViewer.replace_image(image)
         self.imageMeta.loadMetaSignal.emit(metaInfo)
+
+
+    def trash_image(self):
+        result = self.repoManager.delete_image(DeleteImagePrompsRequest(
+                prompt=self.imageMetaInfo.prompt,
+                repo=self.imageMetaInfo.engine,
+                date=self.imageMetaInfo.date,
+                time=self.imageMetaInfo.time,
+                nums=["1"]
+            ))
+
+        if result > 0:
+            logging.info("Deleting successful")
+            self.load_image_response(None, None)
+            self.successfulTrashImageSignal.emit()
+        else:
+            logging.info("Deleting unsuccessful")
 
 
     def create_image_action(self, prompt: str):

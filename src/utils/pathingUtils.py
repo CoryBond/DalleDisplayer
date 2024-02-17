@@ -1,7 +1,6 @@
 from pathlib import Path
 import os
 from typing import List
-from utils.enums import DIRECTION
 
 
 RESOURCES_FOLDER = 'resources'

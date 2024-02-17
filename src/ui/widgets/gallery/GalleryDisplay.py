@@ -12,6 +12,18 @@ from ui.widgets.home.ImageMeta import ImageMetaInfo
 
 
 class ImagesDisplay(QWidget):
+    """
+    QT Widget to display a singular image prompt.
+    This inculdes meta data of the image prompt like date, time, images generated and prompt used.
+
+    Attributes
+    ----------
+    imageClickedSignal
+        signal that is emited when the image is clicked in the gallery
+
+    Methods
+    ----------
+    """
     imageClickedSignal =  pyqtSignal(ImageMetaInfo, bytes)
 
     def __init__(self, imageResult: ImagePrompResult):
@@ -74,6 +86,19 @@ class ImagesDisplay(QWidget):
 
 
 class GalleryDisplay(QScrollArea):
+    """
+    QT Widget to display a single page worth of image prompts.
+
+    Attributes
+    ----------
+    imageClickedSignal
+        signal that is emited when any image is clicked in the gallery
+
+    Methods
+    ----------
+    replace_display()
+        Replaces the page with a new page worth of image prompts
+    """
     imageClickedSignal = pyqtSignal(ImageMetaInfo, object)
 
 
