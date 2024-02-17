@@ -77,6 +77,7 @@ Featrues:
 Bug Fixes:
 
 1. Meta prompt display not word wrapping properly for prompts that have big words. [✅]
+1. Create and clear buttons on image generator don't start off as disabled. [✅]
 
 
 **Version 2.2**
