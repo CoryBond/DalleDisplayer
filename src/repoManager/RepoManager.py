@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from typing import Union, List
 from repoManager.DirectoryIterator import DirectoryIterator
-from repoManager.Models import ImagePrompResult, NextToken, ImagePromptDirectory, GetImagePrompsResult
+from repoManager.Models import DeleteImagePrompsRequest, ImagePrompResult, NextToken, ImagePromptDirectory, GetImagePrompsResult
 
 from repoManager.utils import generate_file_name, generate_image_prompt_path
 from utils.dateUtils import generate_ios_date_time_strs
@@ -307,3 +307,75 @@ class RepoManager(object):
             num = 1,
             images = [imageBytes]
         )
+
+
+    def move_to_trash(self, imagePromptInfo: ImagePromptDirectory, nums: List[str]) -> int:
+        """
+        Method to save images and their associated prompt to the file system. Images will be stored and indexed by the
+        date and time in which they were saved. Additionally the image will be saved to whatever repo this repo manager
+        is currently set to.
+
+        Parameters
+        ----------
+        prompt (str):
+            The prompt used to save the image
+
+        image: (Image):
+            The actual image to be saved
+
+        Returns
+        -------
+        ImagePrompResult
+            The meta information after the image was saved.
+        """
+        absImageDirPath = self._generate_abs_image_prompt_path(imagePromptInfo)
+        numDeleted = 0
+
+        for num in nums:
+            try:
+                (absImageDirPath/num).unlink()
+                numDeleted += 1
+            except BaseException as e:
+                logging.info(f'Could not delete {absImageDirPath/num}')
+
+        return numDeleted
+
+
+    def delete_image(self, deleteImagePrompsRequest: DeleteImagePrompsRequest) -> int:
+        """
+        Method to delete images from the file system. If all files in a image directory are deleted from this action
+        then the whole directory is also deleted.
+
+        Parameters
+        ----------
+        prompt (str):
+            The prompt used to save the image
+
+        image: (Image):
+            The actual image to be saved
+
+        Returns
+        -------
+        ImagePrompResult
+            The meta information after the image was saved.
+        """
+        absImageDirPath = self._generate_abs_image_prompt_path(deleteImagePrompsRequest)
+        numDeleted = 0
+
+        for num in deleteImagePrompsRequest.nums:
+            path = absImageDirPath/(num + ".png")
+            try:
+                path.unlink()
+                numDeleted += 1
+            except BaseException as e:
+                logging.info(f'Could not delete {path}')
+
+        # Delete the directory if its now empty
+        if not any(Path(absImageDirPath).iterdir()):
+           absImageDirPath.rmdir()
+
+        # Delete the directory if its now empty
+        if not any(Path(absImageDirPath.parent).iterdir()):
+           absImageDirPath.parent.rmdir()
+
+        return numDeleted

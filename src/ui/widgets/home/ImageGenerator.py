@@ -8,24 +8,15 @@ from ui.dialogs.RecorderDialog import RecorderDialog
 
 class ImageGenerator(QWidget):
     """
-    QT Widget to display a singular and move a singular image.
-    
-    Images can be moved via:
-    1. Panning the image when click/touch drag movements
-    2. Zomming in/out of the image with a pinch (touch) gesture anywhere in the viewer
+    QT Widget to allow users to make the prompt used to generate images.
 
     Attributes
     ----------
 
     Methods
     ----------
-    replace_image(imagePath)
-        Replaces the current image with a new one from the given path. The new image will "fit" into the views current frame when fully loaded.
 
-    has_photo()
-        Returns if the current view has any image loaded to it currently
     """
-
     def __init__(self, createImageSignal: pyqtSignal, speechRecognizer: SpeechRecognizer):
         super().__init__()
 

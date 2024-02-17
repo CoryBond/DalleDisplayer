@@ -51,10 +51,15 @@ class UIOrchestrator():
             self.mainWindow.route_to_page(self.homePage)
         self.galleryPage.imageClickedSignal.connect(loadImageToMainPage)
 
-        # Home Page Image Generation Must Refresh Gallery
+        # Home Page Image Generation Must Refresh Gallery. Optimize by only refreshing the first page
+        def refreshFirstPage():
+            if self.galleryPage.leftBookmarkPageToken is None:
+                self.galleryPage.galleryRefreshSignal.emit()
+        self.homePage.successfulSavedImageSignal.connect(refreshFirstPage)
+        # Home Page image trashing must refresh all pages. TODO Probably a better way to optimize this.
         def refreshGallery():
-            self.galleryPage.galleryRefreshedSignal.emit()
-        self.homePage.saveImageSignal.connect(refreshGallery)
+            self.galleryPage.galleryRefreshSignal.emit()
+        self.homePage.successfulTrashImageSignal.connect(refreshGallery)
 
 
     def start(self):
