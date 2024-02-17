@@ -35,6 +35,7 @@ class ImageGenerator(QWidget):
         imageGenerationLayout.addLayout(self.createImageButtons())
 
         self.setLayout(imageGenerationLayout)
+        self.prompt_text_changed_action() # disable actions for empty text
 
 
     def createPromptCreator(self) -> QWidget:

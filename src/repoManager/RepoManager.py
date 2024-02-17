@@ -309,38 +309,6 @@ class RepoManager(object):
         )
 
 
-    def move_to_trash(self, imagePromptInfo: ImagePromptDirectory, nums: List[str]) -> int:
-        """
-        Method to save images and their associated prompt to the file system. Images will be stored and indexed by the
-        date and time in which they were saved. Additionally the image will be saved to whatever repo this repo manager
-        is currently set to.
-
-        Parameters
-        ----------
-        prompt (str):
-            The prompt used to save the image
-
-        image: (Image):
-            The actual image to be saved
-
-        Returns
-        -------
-        ImagePrompResult
-            The meta information after the image was saved.
-        """
-        absImageDirPath = self._generate_abs_image_prompt_path(imagePromptInfo)
-        numDeleted = 0
-
-        for num in nums:
-            try:
-                (absImageDirPath/num).unlink()
-                numDeleted += 1
-            except BaseException as e:
-                logging.info(f'Could not delete {absImageDirPath/num}')
-
-        return numDeleted
-
-
     def delete_image(self, deleteImagePrompsRequest: DeleteImagePrompsRequest) -> int:
         """
         Method to delete images from the file system. If all files in a image directory are deleted from this action
