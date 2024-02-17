@@ -1,7 +1,6 @@
-import pytest
 from typing import Dict, List
+from utils.enums import DIRECTION
 
-from utils.pathingUtils import DIRECTION
 from utils.algoUtils import get_next_string_index_from_reverse_sorted
 
 TimeWithPromptDictType = Dict[str, List[str]]
